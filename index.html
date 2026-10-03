@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ของแข็งและของไหล — สื่อจำลองเชิงโต้ตอบ</title>
+<style>
+  :root {
+    --ink: #1a2332;
+    --muted: #5c6b7a;
+    --navy: #14324f;
+    --teal: #0f6e8c;
+    --line: #e3d9cc;
+    --card: #fffdfb;
+    --paper: #f6f3ec;
+    --amber: #c45c12;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: "Leelawadee UI", Tahoma, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(900px 320px at 0% -10%, #d5ebf4, transparent 55%),
+      linear-gradient(#f7f4ee, #e8eef2);
+    line-height: 1.45;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 2px;
+  }
+  .app-header, .layout { max-width: 1440px; margin: 0 auto; }
+  .app-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    padding: 16px 18px 8px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; gap: 12px; align-items: center; }
+  .mark {
+    width: 46px; height: 46px; border-radius: 14px;
+    background: var(--navy); color: #f3d27a;
+    display: grid; place-items: center;
+    font-size: 28px; font-weight: 700; flex: none;
+  }
+  h1 { margin: 0; font-size: 26px; color: var(--navy); letter-spacing: -0.02em; }
+  #objective { margin: 3px 0 0; color: var(--muted); max-width: 720px; }
+  .const {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 13px;
+    color: var(--navy);
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(270px, 320px) minmax(340px, 1fr) minmax(280px, 340px);
+    gap: 14px;
+    padding: 8px 14px 20px;
+    align-items: start;
+  }
+  .layout > * { min-width: 0; }
+  .col {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 12px;
+    box-shadow: 0 10px 28px rgba(20, 50, 79, 0.05);
+  }
+  .left, .right { max-height: calc(100vh - 108px); overflow: auto; }
+  h2 { margin: 12px 0 8px; font-size: 15px; color: var(--navy); }
+  .left h2:first-child, .modes-head { margin-top: 0; }
+  .modes, .transport { display: grid; gap: 6px; }
+  .transport { grid-template-columns: 1fr 1fr 1fr; }
+  .modes button, .transport button, .presets button, .chips button {
+    border: 1px solid #d9d0c3;
+    background: #fff;
+    border-radius: 10px;
+  }
+  .modes button { text-align: left; padding: 8px 10px; }
+  .modes button small { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
+  .modes button[aria-pressed="true"] {
+    background: var(--navy); color: white; border-color: var(--navy);
+  }
+  .modes button[aria-pressed="true"] small { color: #c5d5e4; }
+  .transport button, .presets button, .chips button { padding: 7px 8px; }
+  .transport button[aria-pressed="true"],
+  .presets button[aria-pressed="true"],
+  .chips button[aria-pressed="true"] {
+    background: var(--teal); color: white; border-color: var(--teal);
+  }
+  .presets, .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .switch { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; font-size: 14px; }
+  .hint { color: var(--muted); font-size: 12.5px; margin: 4px 0 0; }
+  .field { display: grid; grid-template-columns: 1fr 92px; gap: 4px 8px; margin: 8px 0; align-items: center; }
+  .field .name { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+  input[type="range"] { width: 100%; accent-color: var(--teal); }
+  input[type="number"] {
+    width: 100%; padding: 4px 6px;
+    border: 1px solid #d9d0c3; border-radius: 8px; background: #fff;
+  }
+  .stage { background: linear-gradient(#fbfdff, #eef4f7); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  canvas.sim { width: 100%; height: min(560px, 70vh); display: block; }
+  canvas.graph { width: 100%; height: 340px; display: block; background: #fffdfb; border-radius: 12px; border: 1px solid var(--line); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 8px; margin-top: 8px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
+  .card .lbl { color: var(--muted); font-size: 12px; }
+  .card .val { color: var(--navy); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .card .unit { color: var(--muted); font-size: 12px; }
+  .eq {
+    margin-top: 8px; background: var(--navy); color: #f4fbff;
+    border-radius: 14px; padding: 10px 12px; overflow-x: auto; line-height: 1.65;
+  }
+  .eq .line { margin: 3px 0; }
+  .eq .ans { color: #fde68a; font-weight: 700; }
+  .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 0.28em; line-height: 1.12; font-size: 0.92em; }
+  .frac .num { border-bottom: 1.5px solid currentColor; padding: 0 0.35em 1px; }
+  .frac .den { padding: 1px 0.35em 0; }
+  table.bern { border-collapse: collapse; width: 100%; margin-top: 6px; font-size: 13px; }
+  table.bern th, table.bern td { padding: 3px 8px; text-align: right; white-space: nowrap; }
+  table.bern th:first-child, table.bern td:first-child { text-align: left; }
+  table.bern tr:last-child td { font-weight: 700; border-top: 1px solid rgba(255,255,255,.28); }
+  #assume { color: var(--muted); font-size: 12.5px; margin: 8px 2px 0; }
+  #warnings:empty { display: none; }
+  .warnbox { background: #fef2f2; border: 1px solid #fecaca; color: #7f1d1d; border-radius: 12px; padding: 8px 10px; margin-top: 8px; }
+  .warnbox p, .analysis p, .mis p { margin: 0 0 8px; }
+  .warnbox p:last-child, .analysis p:last-child, .mis p:last-child { margin-bottom: 0; }
+  .analysis, .mis { border-radius: 12px; padding: 10px 12px; font-size: 14px; }
+  .analysis { background: #f1fbf8; border: 1px solid #b7e4d8; }
+  .mis { background: #fff6ed; border: 1px solid #f3c7a2; }
+  .block { margin-top: 12px; }
+  #graphCap { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+  [hidden] { display: none !important; }
+  @media (max-width: 1100px) {
+    .layout { grid-template-columns: 1fr; }
+    .left, .right { max-height: none; }
+    canvas.sim { height: 460px; }
+  }
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <span class="mark" aria-hidden="true">ρ</span>
+    <div>
+      <h1>ของแข็งและของไหล</h1>
+      <p id="objective">สื่อจำลองเชิงโต้ตอบสำหรับฟิสิกส์ ม.4–ม.6</p>
+    </div>
+  </div>
+  <div class="const">g = 9.81 m/s² · P₀ = 1.013×10<sup>5</sup> Pa</div>
+</header>
+<div class="layout">
+  <aside class="col left">
+    <h2 class="modes-head">โหมดการจำลอง</h2>
+    <div class="modes" id="modes">
+      <button type="button" data-mode="1" aria-pressed="true">1. สภาพยืดหยุ่น<small>ความเค้น ความเครียด มอดุลัสของยัง</small></button>
+      <button type="button" data-mode="2">2. ความดันและแรงลอยตัว<small>P = P₀ + ρgh และอาร์คิมีดิส</small></button>
+      <button type="button" data-mode="3">3. แรงตึงผิวและความหนืด<small>สโตกส์และความเร็วปลาย</small></button>
+      <button type="button" data-mode="4">4. พลศาสตร์ของไหล<small>ความต่อเนื่องและแบร์นูลลี</small></button>
+    </div>
+
+    <h2>การทดลอง</h2>
+    <div class="transport">
+      <button type="button" id="btnPlay">เล่น</button>
+      <button type="button" id="btnPause">หยุด</button>
+      <button type="button" id="btnReset" title="เริ่มการเคลื่อนที่ใหม่ โดยไม่ล้างค่าที่ตั้ง">เริ่มใหม่</button>
+    </div>
+
+    <h2>การแสดงผล</h2>
+    <label class="switch"><input type="checkbox" id="togForce" checked> แสดงเวกเตอร์แรง (F<sub>g</sub>, F<sub>B</sub>, F<sub>v</sub>, F<sub>N</sub>, T)</label>
+    <label class="switch"><input type="checkbox" id="togFlow" checked> แสดงเส้นสายธารการไหลและแผนที่ความดัน</label>
+    <p class="hint">แผนที่ความดันใช้กับท่อเวนจูรี สีอุ่นหมายถึงความดันสูง สีเย็นหมายถึงความดันต่ำ</p>
+
+    <div class="group" data-modes="2,3,4" hidden>
+      <h2>ชนิดของเหลว</h2>
+      <div class="presets" id="fluids">
+        <button type="button" data-fluid="water">น้ำ</button>
+        <button type="button" data-fluid="oil">น้ำมัน</button>
+        <button type="button" data-fluid="mercury">ปรอท</button>
+        <button type="button" data-fluid="glycerin">กลีเซอรีน</button>
+      </div>
+      <p class="hint">ปุ่มชนิดของเหลวกำหนด ρ, η และ γ พร้อมกัน</p>
+    </div>
+
+    <div class="group" data-modes="2,3" hidden>
+      <h2>ความหนาแน่นวัตถุ</h2>
+      <div class="chips" id="densChips">
+        <button type="button" data-rho="600">ไม้ 600</button>
+        <button type="button" data-rho="800">พลาสติก 800</button>
+        <button type="button" data-rho="2700">อะลูมิเนียม 2,700</button>
+        <button type="button" data-rho="7800">เหล็ก 7,800</button>
+      </div>
+    </div>
+
+    <div class="group" data-modes="2,3" hidden>
+      <label class="field">
+        <span class="name"><span>ความหนาแน่นวัตถุ ρ<sub>obj</sub> (kg/m³)</span></span>
+        <input id="rhoObjR" type="range" min="200" max="10000" step="100" value="800">
+        <input id="rhoObjN" type="number" min="200" max="10000" step="100" value="800">
+      </label>
+    </div>
+
+    <div class="group" data-modes="2,3,4" hidden>
+      <label class="field">
+        <span class="name"><span>ความหนาแน่นของเหลว ρ<sub>fluid</sub> (kg/m³)</span></span>
+        <input id="rhoFR" type="range" min="500" max="14000" step="10" value="1000">
+        <input id="rhoFN" type="number" min="500" max="14000" step="10" value="1000">
+      </label>
+    </div>
+
+    <div class="group" data-modes="2" hidden>
+      <label class="field">
+        <span class="name"><span>ปริมาตรวัตถุ V (m³)</span></span>
+        <input id="volR" type="range" min="0.001" max="0.1" step="0.001" value="0.01">
+        <input id="volN" type="number" min="0.001" max="0.1" step="0.001" value="0.01">
+      </label>
+      <p class="hint">วัตถุเป็นลูกบาศก์ พื้นที่ฐานถัง 0.64 m²</p>
+    </div>
+
+    <div class="group" data-modes="3" hidden>
+      <h2>การตกในของเหลวหนืด</h2>
+      <label class="field">
+        <span class="name"><span>ความหนืด η (Pa·s)</span></span>
+        <input id="etaR" type="range" min="0.001" max="1.5" step="0.001" value="0.001">
+        <input id="etaN" type="number" min="0.001" max="1.5" step="0.001" value="0.001">
+      </label>
+      <label class="field">
+        <span class="name"><span>รัศมีลูกกลม r (m)</span></span>
+        <input id="radR" type="range" min="0.002" max="0.03" step="0.001" value="0.01">
+        <input id="radN" type="number" min="0.002" max="0.03" step="0.001" value="0.01">
+      </label>
+      <p class="hint">ต้องการเห็นการตกช้าจนถึงความเร็วปลาย ลองกลีเซอรีนหรือเพิ่ม η และตั้งวัตถุเป็นเหล็ก</p>
+    </div>
+
+    <div class="group" data-modes="1">
+      <h2>เส้นลวด</h2>
+      <div class="chips" id="mats">
+        <button type="button" data-y="200e9">เหล็ก</button>
+        <button type="button" data-y="110e9">ทองแดง</button>
+        <button type="button" data-y="70e9">อะลูมิเนียม</button>
+        <button type="button" data-y="5e6">ยาง</button>
+      </div>
+      <label class="field">
+        <span class="name"><span>แรงดึง F (N)</span></span>
+        <input id="forceR" type="range" min="0" max="5000" step="1" value="200">
+        <input id="forceN" type="number" min="0" max="5000" step="1" value="200">
+      </label>
+      <label class="field">
+        <span class="name"><span>พื้นที่หน้าตัด A (mm²)</span></span>
+        <input id="areaR" type="range" min="0.5" max="10" step="0.1" value="2">
+        <input id="areaN" type="number" min="0.5" max="10" step="0.1" value="2">
+      </label>
+      <label class="field">
+        <span class="name"><span>ความยาวเดิม L₀ (m)</span></span>
+        <input id="lenR" type="range" min="0.2" max="2" step="0.01" value="1">
+        <input id="lenN" type="number" min="0.2" max="2" step="0.01" value="1">
+      </label>
+      <label class="field">
+        <span class="name"><span>มอดุลัสของยัง Y (GPa)</span></span>
+        <input id="yR" type="range" min="0" max="1000" step="1" value="860">
+        <input id="yN" type="number" min="0.001" max="400" step="0.001" value="200">
+      </label>
+      <p class="hint">สเกล Y เป็นลอการิทึม เพื่อเลื่อนได้ตั้งแต่ยางถึงเหล็ก การเลือกวัสดุจะตั้งแรงให้อยู่ใกล้ช่วงยืดหยุ่น</p>
+    </div>
+
+    <div class="group" data-modes="4" hidden>
+      <h2>ท่อเวนจูรี</h2>
+      <label class="field">
+        <span class="name"><span>พื้นที่ A₁ (m²)</span></span>
+        <input id="a1R" type="range" min="0.05" max="1" step="0.01" value="0.5">
+        <input id="a1N" type="number" min="0.05" max="1" step="0.01" value="0.5">
+      </label>
+      <label class="field">
+        <span class="name"><span>พื้นที่ A₂ ที่คอท่อ (m²)</span></span>
+        <input id="a2R" type="range" min="0.05" max="1" step="0.01" value="0.2">
+        <input id="a2N" type="number" min="0.05" max="1" step="0.01" value="0.2">
+      </label>
+      <label class="field">
+        <span class="name"><span>ความสูง h₁ (m)</span></span>
+        <input id="h1R" type="range" min="0" max="3" step="0.1" value="0">
+        <input id="h1N" type="number" min="0" max="3" step="0.1" value="0">
+      </label>
+      <label class="field">
+        <span class="name"><span>ความสูง h₂ (m)</span></span>
+        <input id="h2R" type="range" min="0" max="3" step="0.1" value="0">
+        <input id="h2N" type="number" min="0" max="3" step="0.1" value="0">
+      </label>
+      <label class="field">
+        <span class="name"><span>อัตราเร็ว v₁ (m/s)</span></span>
+        <input id="v1R" type="range" min="0.5" max="10" step="0.1" value="2">
+        <input id="v1N" type="number" min="0.5" max="10" step="0.1" value="2">
+      </label>
+      <label class="field">
+        <span class="name"><span>อัตราการไหล Q (m³/s)</span></span>
+        <input id="qR" type="range" min="0.05" max="8" step="0.01" value="1">
+        <input id="qN" type="number" min="0.05" max="8" step="0.01" value="1">
+      </label>
+      <p class="hint">Q กับ v₁ ผูกกันด้วย Q = A₁v₁ ของไหลอุดมคติ อัดไม่ได้ และไม่มีความหนืด</p>
+    </div>
+  </aside>
+
+  <main class="col">
+    <div class="stage"><canvas id="sim" class="sim" width="800" height="540" aria-label="ภาพจำลอง"></canvas></div>
+    <div id="warnings"></div>
+    <div id="cards" class="cards"></div>
+    <div id="eq" class="eq"></div>
+    <p id="assume"></p>
+  </main>
+
+  <aside class="col right">
+    <h2>กราฟความสัมพันธ์</h2>
+    <p id="graphCap"></p>
+    <canvas id="graph" class="graph" width="640" height="340" aria-label="กราฟ"></canvas>
+    <div class="block">
+      <h2>ผลการวิเคราะห์</h2>
+      <div id="analysis" class="analysis"></div>
+    </div>
+    <div class="block">
+      <h2>ความเข้าใจคลาดเคลื่อนที่พบบ่อย</h2>
+      <div id="mis" class="mis"></div>
+    </div>
+  </aside>
+</div>
+<script>
+const g = 9.81;
+const P0 = 1.013e5;
+const FLUIDS = {
+  water: { name: "น้ำ", rho: 1000, eta: 0.001, gamma: 0.0728, color: "#3aa0d8", deep: "#0d6f9c" },
+  oil: { name: "น้ำมัน", rho: 800, eta: 0.081, gamma: 0.033, color: "#e0b44a", deep: "#a67c1a" },
+  mercury: { name: "ปรอท", rho: 13600, eta: 0.0015, gamma: 0.487, color: "#c5ced6", deep: "#8b97a3" },
+  glycerin: { name: "กลีเซอรีน", rho: 1260, eta: 1.49, gamma: 0.0634, color: "#efd08a", deep: "#c49a3c" }
+};
+const state = {
+  mode: 1, playing: true, showForces: true, showFlow: true,
+  rhoObj: 800, rhoFluid: 1000, volume: 0.01,
+  eta: 0.001, gamma: 0.0728, fluidKey: "water",
+  force: 200, areaMM2: 2, L0: 1, Y: 200e9, radius: 0.01,
+  A1: 0.5, A2: 0.2, h1: 0, h2: 0, v1: 2, Q: 1
+};
+const view = {
+  epsShown: 0, snapped: false, fallY: 0, fallV: 0, breakT: 0,
+  hWater: 0.36, objBottom: 0.36, buoyReady: false, buoyDirty: false,
+  wave: 0, bub: 0, dash: 0, timeScale: 1
+};
+const ball = { y: 0.02, v: 0, t: 0, hist: [{ t: 0, v: 0 }], sample: 0, onFloor: false, vImpact: 0 };
+let particles = [];
+let flux1 = 0, flux2 = 0, spawnAcc = 0;
+let silent = false;
+let last = 0;
+const domCache = {};
+
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function $(id) { return document.getElementById(id); }
+function num(v, fb) { const x = parseFloat(v); return Number.isFinite(x) ? x : fb; }
+
+function sup(n) {
+  const map = { "−": "⁻", "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
+  return String(n).split("").map((ch) => map[ch] || ch).join("");
+}
+function trimZeros(s) { return s.indexOf(".") >= 0 ? s.replace(/\.?0+$/, "") : s; }
+function fmt(n, digits) {
+  if (!Number.isFinite(n)) return "—";
+  const sign = n < 0 ? "−" : "";
+  const a = Math.abs(n);
+  if (a === 0) return "0";
+  if (digits != null && a >= 1e-4 && a < 1e6) return sign + trimZeros(a.toFixed(digits));
+  if (a >= 0.01 && a < 1e5) {
+    const digs = a >= 100 ? 1 : a >= 10 ? 2 : a >= 1 ? 3 : 4;
+    return sign + trimZeros(a.toFixed(digs));
+  }
+  const exp = Math.floor(Math.log10(a));
+  const m = a / Math.pow(10, exp);
+  return sign + trimZeros(m.toFixed(3)) + "×10" + sup(exp);
+}
+function fmtLen(m) {
+  const a = Math.abs(m);
+  const s = m < 0 ? "−" : "";
+  if (a < 0.01) return s + (a * 1000).toFixed(2) + " mm";
+  if (a < 1) return s + (a * 100).toFixed(2) + " cm";
+  return s + a.toFixed(3) + " m";
+}
+function fmtGPa(Y) {
+  const v = Y / 1e9;
+  if (v >= 10) return String(Math.round(v * 10) / 10);
+  if (v >= 1) return String(Math.round(v * 100) / 100);
+  return String(Math.round(v * 10000) / 10000);
+}
+function yToPos(Y) {
+  const a = Math.log(1e6), b = Math.log(400e9);
+  return Math.round(1000 * (Math.log(clamp(Y, 1e6, 400e9)) - a) / (b - a));
+}
+function posToY(p) {
+  const a = Math.log(1e6), b = Math.log(400e9);
+  return Math.exp(a + (clamp(p, 0, 1000) / 1000) * (b - a));
+}
+function smoothstep(t) { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); }
+function paras(lines) { return lines.filter(Boolean).map((s) => "<p>" + s + "</p>").join(""); }
+function paint(id, html) {
+  if (domCache[id] === html) return;
+  domCache[id] = html;
+  const el = $(id);
+  if (el) el.innerHTML = html;
+}
+
+function limitsFromY(Y) {
+  if (Y < 2e8) return { sigmaP: 0.30 * Y, sigmaU: 0.80 * Y, epsBreak: 1.6 };
+  return { sigmaP: 0.00125 * Y, sigmaU: 0.002 * Y, epsBreak: 0.15 };
+}
+function strainFromStress(sigma, Y, lim) {
+  const epsP = lim.sigmaP / Y;
+  if (sigma < lim.sigmaP) return { eps: sigma / Y, regime: "elastic" };
+  if (sigma < lim.sigmaU) {
+    const t = (sigma - lim.sigmaP) / (lim.sigmaU - lim.sigmaP);
+    return { eps: epsP + t * t * (lim.epsBreak - epsP), regime: "plastic" };
+  }
+  return { eps: lim.epsBreak, regime: "broken" };
+}
+function elasticity() {
+  const A = state.areaMM2 * 1e-6;
+  const Y = state.Y;
+  const F = state.force;
+  const L0 = state.L0;
+  const lim = limitsFromY(Y);
+  const sigma = A > 0 ? F / A : 0;
+  const st = strainFromStress(sigma, Y, lim);
+  const dL = st.eps * L0;
+  const k = Y * A / L0;
+  return { A, Y, F, L0, lim, sigma, eps: st.eps, regime: st.regime, dL, k, mEq: F / g, epsP: lim.sigmaP / Y };
+}
+function solveBuoyancy() {
+  const rhoO = state.rhoObj, rhoF = state.rhoFluid, V = state.volume;
+  const a = Math.cbrt(V);
+  const tankSide = 0.8, At = tankSide * tankSide, h0 = 0.36, tankH = 0.98;
+  const W = rhoO * V * g;
+  let status, hSub, Vsub, hWater, objBottom, T, FN;
+  const rise = (Vs) => h0 + Vs / At;
+  if (rhoO < rhoF) {
+    status = "ลอย";
+    hSub = a * (rhoO / rhoF);
+    Vsub = a * a * hSub;
+    hWater = rise(Vsub);
+    objBottom = hWater - hSub;
+    T = 0; FN = 0;
+    if (objBottom < 0) {
+      objBottom = 0;
+      hWater = h0 / (1 - (a * a) / At);
+      hSub = Math.min(a, hWater);
+      Vsub = a * a * hSub;
+      FN = Math.max(0, W - rhoF * Vsub * g);
+      status = "จมแตะพื้น";
+    }
+  } else {
+    status = "จม";
+    Vsub = V; hSub = a; hWater = rise(V);
+    const fb = rhoF * V * g;
+    T = Math.max(0, W - fb); FN = 0;
+    objBottom = hWater - 0.015 - a;
+    if (objBottom < 0.01) {
+      objBottom = 0;
+      FN = Math.max(0, W - fb);
+      T = 0;
+      status = "จมวางก้นถัง";
+    } else if (Math.abs(W - fb) <= Math.max(0.05, 0.005 * W)) {
+      status = "สมดุลกลางน้ำ";
+      T = Math.max(0, W - fb);
+      objBottom = Math.max(0.02, (hWater - a) * 0.45);
+    }
+  }
+  const FB = rhoF * Vsub * g;
+  const Pg = rhoF * g * hWater;
+  return {
+    a, tankSide, tankH, h0, At, W, FB, Vsub, hSub, hWater, objBottom, T, FN, status, Pg,
+    P: P0 + Pg, pct: 100 * Vsub / V, rhoO, rhoF, V
+  };
+}
+function capVolume(r, h) { return Math.PI * h * h * (3 * r - h) / 3; }
+function submergedHeight(y, r) {
+  const bottom = y + r, top = y - r;
+  if (bottom <= 0) return 0;
+  if (top >= 0) return 2 * r;
+  return bottom;
+}
+function submergedVolume(r, hSub) {
+  const V = 4 / 3 * Math.PI * r * r * r;
+  if (hSub <= 0) return 0;
+  if (hSub >= 2 * r) return V;
+  if (hSub <= r) return capVolume(r, hSub);
+  return V - capVolume(r, 2 * r - hSub);
+}
+function ballForces(y, v) {
+  const r = state.radius;
+  const V = 4 / 3 * Math.PI * r * r * r;
+  const m = Math.max(state.rhoObj * V, 1e-12);
+  const hSub = submergedHeight(y, r);
+  const Vsub = submergedVolume(r, hSub);
+  const frac = Vsub / V;
+  const Fg = m * g;
+  const Fb = state.rhoFluid * Vsub * g;
+  const touching = hSub > 1e-6 && hSub < 2 * r - 1e-6;
+  const Fgamma = touching ? state.gamma * 2 * Math.PI * r * Math.sin(Math.PI * hSub / (2 * r)) : 0;
+  const Fv = 6 * Math.PI * state.eta * r * v * frac;
+  return { r, V, m, hSub, Vsub, frac, Fg, Fb, Fgamma, Fv };
+}
+function terminalV() {
+  const r = state.radius;
+  return (2 * r * r * g * (state.rhoObj - state.rhoFluid)) / (9 * state.eta);
+}
+function relaxTime() {
+  return (2 * state.rhoObj * state.radius * state.radius) / (9 * state.eta);
+}
+function areaProfile(s) {
+  const A1 = state.A1, A2 = state.A2;
+  if (s < 0.22) return A1;
+  if (s < 0.40) return A1 + (A2 - A1) * smoothstep((s - 0.22) / 0.18);
+  if (s < 0.58) return A2;
+  if (s < 0.76) return A2 + (A1 - A2) * smoothstep((s - 0.58) / 0.18);
+  return A1;
+}
+function elevProfile(s) {
+  const h1 = state.h1, h2 = state.h2;
+  if (s < 0.22) return h1;
+  if (s < 0.40) return h1 + (h2 - h1) * smoothstep((s - 0.22) / 0.18);
+  if (s < 0.58) return h2;
+  if (s < 0.76) return h2 + (h1 - h2) * smoothstep((s - 0.58) / 0.18);
+  return h1;
+}
+function flowInfo() {
+  const rho = state.rhoFluid;
+  const v1 = state.v1;
+  const A1 = state.A1, A2 = state.A2;
+  const Q = A1 * v1;
+  const v2 = Q / A2;
+  const h1 = state.h1, h2 = state.h2;
+  const dP = 0.5 * rho * (v2 * v2 - v1 * v1) + rho * g * (h2 - h1);
+  const floorG = 8000;
+  let P1g, P2g;
+  if (dP >= 0) { P2g = floorG; P1g = floorG + dP; }
+  else { P1g = floorG; P2g = floorG - dP; }
+  const P1 = P0 + P1g, P2 = P0 + P2g;
+  const kin1 = 0.5 * rho * v1 * v1, kin2 = 0.5 * rho * v2 * v2;
+  const pot1 = rho * g * h1, pot2 = rho * g * h2;
+  return {
+    rho, v1, v2, A1, A2, Q, h1, h2, dP, P1, P2, P1g, P2g, kin1, kin2, pot1, pot2,
+    sum1: P1 + kin1 + pot1, sum2: P2 + kin2 + pot2,
+    head1: P1g / (rho * g), head2: P2g / (rho * g)
+  };
+}
+function pressureAtS(s, flow) {
+  const v = flow.Q / areaProfile(s);
+  return flow.sum1 - 0.5 * flow.rho * v * v - flow.rho * g * elevProfile(s);
+}
+function fluidVisual() {
+  if (state.fluidKey !== "custom" && FLUIDS[state.fluidKey]) return FLUIDS[state.fluidKey];
+  let best = FLUIDS.water, bestD = Infinity;
+  Object.keys(FLUIDS).forEach((k) => {
+    const d = Math.abs(FLUIDS[k].rho - state.rhoFluid);
+    if (d < bestD) { bestD = d; best = FLUIDS[k]; }
+  });
+  return best;
+}
+function cubeColor(rho) {
+  if (rho < 700) return "#c4a574";
+  if (rho < 950) return "#6f9a72";
+  if (rho < 2000) return "#8a8f86";
+  if (rho < 4000) return "#7d736a";
+  if (rho < 7000) return "#6a7178";
+  return "#4e5964";
+}
+
+function runChecks() {
+  const problems = [];
+  const saved = Object.assign({}, state);
+  state.v1 = 2; state.A1 = 0.5; state.A2 = 0.2; state.h1 = 1; state.h2 = 2.5; state.rhoFluid = 1000;
+  const f = flowInfo();
+  if (Math.abs(f.sum1 - f.sum2) > 1e-3) problems.push("bernoulli");
+  if (Math.abs(f.v2 - 5) > 1e-9) problems.push("continuity");
+  if (Math.abs(submergedVolume(1, 1) - (2 / 3) * Math.PI) > 1e-9) problems.push("half sphere");
+  if (Math.abs(submergedVolume(1, 2) - 4 / 3 * Math.PI) > 1e-9) problems.push("full sphere");
+  const vt = (2 * 0.01 * 0.01 * g * (7800 - 1000)) / (9 * 0.001);
+  const expect = 2 * 0.0001 * 9.81 * 6800 / 0.009;
+  if (Math.abs(vt - expect) > 1e-6) problems.push("vt");
+  const lim = limitsFromY(200e9);
+  const st = strainFromStress(200 / 2e-6, 200e9, lim);
+  if (Math.abs(st.eps - 5e-4) > 1e-12 || st.regime !== "elastic") problems.push("hooke");
+  Object.assign(state, saved);
+  if (problems.length && typeof document === "undefined") throw new Error(problems.join(", "));
+  if (problems.length) console.error("physics check", problems);
+}
+
+function resetBall() {
+  const r = state.radius;
+  ball.y = r + 0.012;
+  ball.v = 0;
+  ball.t = 0;
+  ball.hist = [{ t: 0, v: 0 }];
+  ball.sample = 0;
+  ball.onFloor = false;
+  ball.vImpact = 0;
+}
+function stepBall(dt) {
+  const r = state.radius;
+  const floor = 0.8 - r;
+  const f = ballForces(ball.y, ball.v);
+  const cStokes = (6 * Math.PI * state.eta * r * f.frac) / f.m;
+  const crossing = f.frac > 0.001 && f.frac < 0.999;
+  const c = cStokes + (crossing ? 25 : 0);
+  const a = (f.Fg - f.Fb) / f.m;
+  const vNew = (ball.v + a * dt) / (1 + c * dt);
+  ball.v = vNew;
+  ball.y += ball.v * dt;
+  if (ball.y > floor) {
+    if (!ball.onFloor && ball.v > 0) {
+      ball.vImpact = ball.v;
+      ball.hist.push({ t: ball.t, v: ball.v });
+    }
+    ball.y = floor;
+    if (ball.v > 0) ball.v = 0;
+    ball.onFloor = true;
+  } else ball.onFloor = false;
+  if (ball.y < -0.22) {
+    ball.y = -0.22;
+    if (ball.v < 0) ball.v = 0;
+  }
+  ball.t += dt;
+  ball.sample += dt;
+  if (ball.sample >= 0.03) {
+    ball.sample = 0;
+    ball.hist.push({ t: ball.t, v: ball.v });
+    if (ball.hist.length > 500) ball.hist.shift();
+  }
+}
+function timeScale() {
+  const vt = Math.abs(terminalV());
+  const vChar = Math.min(Math.max(vt, 0.08), 2.5);
+  const transit = 0.8 / vChar;
+  return clamp(transit / 4, 0.03, 1);
+}
+function ballSettled() {
+  if (ball.t < 0.3) return false;
+  if (ball.onFloor) return true;
+  return Math.abs(ball.v) < 0.02 && ball.t > 0.8;
+}
+function seedParticles() {
+  particles = [];
+  flux1 = 0; flux2 = 0; spawnAcc = 0;
+  for (let i = 0; i < 42; i++) {
+    const s = Math.random();
+    particles.push({ s, lane: Math.random() * 1.5 - 0.75, counted1: s >= 0.11, counted2: s >= 0.49 });
+  }
+}
+function markFlow() {
+  flux1 = 0; flux2 = 0;
+  particles.forEach((p) => { p.counted1 = p.s >= 0.11; p.counted2 = p.s >= 0.49; });
+}
+function updateParticles(dt) {
+  const Q = state.A1 * state.v1;
+  const vRef = Math.max(state.v1, 0.2);
+  spawnAcc += dt * 26;
+  while (spawnAcc >= 1 && particles.length < 170) {
+    spawnAcc -= 1;
+    particles.push({ s: 0, lane: Math.random() * 1.5 - 0.75, counted1: false, counted2: false });
+  }
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    const v = Q / areaProfile(p.s);
+    const prev = p.s;
+    p.s += (v / vRef) * 0.15 * dt;
+    if (!p.counted1 && prev < 0.11 && p.s >= 0.11) { flux1++; p.counted1 = true; }
+    if (!p.counted2 && prev < 0.49 && p.s >= 0.49) { flux2++; p.counted2 = true; }
+    if (p.s > 1.02) particles.splice(i, 1);
+  }
+}
+function clearBreak() {
+  view.snapped = false; view.fallY = 0; view.fallV = 0; view.breakT = 0;
+}
+function markBuoy() { view.buoyDirty = true; }
+
+function step(dt) {
+  view.wave += dt;
+  view.bub += dt * 0.07;
+  if (state.playing) view.dash += dt * 30;
+  const e = elasticity();
+  view.epsShown += (e.eps - view.epsShown) * Math.min(1, dt * 5);
+  if (e.regime === "broken") {
+    if (state.mode === 1 && state.playing) view.breakT += dt;
+    if (view.breakT > 0.45) view.snapped = true;
+  } else clearBreak();
+  if (view.snapped && state.mode === 1 && state.playing) {
+    view.fallV += 260 * dt;
+    view.fallY = Math.min(170, view.fallY + view.fallV * dt);
+  }
+  if (state.mode === 2) {
+    const sol = solveBuoyancy();
+    if (!view.buoyReady) {
+      let startBottom = sol.h0;
+      if (startBottom + sol.a > sol.tankH - 0.02) startBottom = Math.max(0, sol.tankH - sol.a - 0.02);
+      view.objBottom = startBottom;
+      view.hWater = sol.h0;
+      view.buoyReady = true;
+    } else if (state.playing) {
+      const k = Math.min(1, dt * 1.6);
+      view.objBottom += (sol.objBottom - view.objBottom) * k;
+      view.hWater += (sol.hWater - view.hWater) * k;
+      view.buoyDirty = false;
+    } else if (view.buoyDirty) {
+      view.objBottom = sol.objBottom;
+      view.hWater = sol.hWater;
+      view.buoyDirty = false;
+    }
+  }
+  if (state.mode === 3 && state.playing) {
+    view.timeScale = timeScale();
+    let phys = dt * view.timeScale;
+    let guard = 0;
+    while (phys > 1e-6 && guard < 30) {
+      const h = Math.min(0.002, phys);
+      stepBall(h);
+      phys -= h;
+      guard++;
+    }
+  }
+  if (state.mode === 4 && state.playing) updateParticles(dt);
+}
+
+function fit(canvas) {
+  const w = canvas.clientWidth || 300;
+  const h = canvas.clientHeight || 200;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = Math.max(1, Math.floor(w * dpr));
+  const H = Math.max(1, Math.floor(h * dpr));
+  if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w, h };
+}
+function roundRect(ctx, x, y, w, h, r) {
+  const rr = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+function text(ctx, str, x, y, opt) {
+  opt = opt || {};
+  ctx.fillStyle = opt.color || "#1a2332";
+  ctx.font = opt.font || "12px Leelawadee UI, Tahoma, sans-serif";
+  ctx.textAlign = opt.align || "left";
+  ctx.textBaseline = opt.base || "middle";
+  ctx.fillText(str, x, y);
+}
+function arrow(ctx, x1, y1, x2, y2, color) {
+  const ang = Math.atan2(y2 - y1, x2 - x1);
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  if (len < 6) return;
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  const hl = Math.min(11, len * 0.35);
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - hl * Math.cos(ang - 0.38), y2 - hl * Math.sin(ang - 0.38));
+  ctx.lineTo(x2 - hl * Math.cos(ang + 0.38), y2 - hl * Math.sin(ang + 0.38));
+  ctx.closePath(); ctx.fill();
+}
+function chip(ctx, str, x, y, bg) {
+  ctx.font = "bold 13px Leelawadee UI, Tahoma, sans-serif";
+  const tw = ctx.measureText(str).width;
+  ctx.fillStyle = bg || "rgba(255,253,251,0.94)";
+  roundRect(ctx, x, y, tw + 16, 26, 8); ctx.fill();
+  ctx.strokeStyle = "#e3d9cc"; ctx.lineWidth = 1; ctx.stroke();
+  text(ctx, str, x + 8, y + 13, { font: "bold 13px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+}
+
+function drawMode1(ctx, w, h, e) {
+  ctx.fillStyle = "#f4f8fb"; ctx.fillRect(0, 0, w, h);
+  const topY = 78;
+  const baseLen = Math.min(230, h * 0.46);
+  const epsTarget = Math.max(0, e.eps);
+  const mag = epsTarget > 0 && epsTarget < 0.08 ? Math.min(2000, 0.15 / epsTarget) : 1;
+  const vis = Math.min(0.42, Math.max(0, view.epsShown) * mag);
+  const len = baseLen * (1 + (view.snapped ? Math.min(0.42, e.lim.epsBreak) : vis));
+  const insetW = Math.min(180, Math.max(112, w - 196));
+  const ix = w - insetW - 10;
+  const x = clamp(Math.min(w * 0.36, ix - 96), 78, Math.max(78, ix - 96));
+  ctx.strokeStyle = "#14324f"; ctx.lineWidth = 8; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(x - 70, topY); ctx.lineTo(x + 70, topY); ctx.stroke();
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(x - 16, topY); ctx.lineTo(x + 16, topY + 10); ctx.stroke();
+  ctx.setLineDash([4, 4]); ctx.strokeStyle = "#93a3b3"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(x, topY + 10); ctx.lineTo(x, topY + 10 + baseLen); ctx.stroke();
+  ctx.setLineDash([]);
+  const yEnd = topY + 10 + len;
+  const col = e.regime === "broken" ? "#b91c1c" : e.regime === "plastic" ? "#ea580c" : "#0f766e";
+  ctx.strokeStyle = col; ctx.lineWidth = 3;
+  if (!view.snapped) {
+    ctx.beginPath(); ctx.moveTo(x, topY + 10); ctx.lineTo(x, yEnd); ctx.stroke();
+  } else {
+    const mid = topY + 10 + len * 0.42;
+    ctx.beginPath(); ctx.moveTo(x, topY + 10); ctx.lineTo(x, mid); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - 6, mid + 8); ctx.lineTo(x + 5, mid + 16); ctx.lineTo(x - 3, mid + 24); ctx.stroke();
+  }
+  const massY = (view.snapped ? topY + 10 + len * 0.42 + 36 : yEnd) + view.fallY;
+  roundRect(ctx, x - 36, massY, 72, 48, 8);
+  ctx.fillStyle = "#3e4c59"; ctx.fill();
+  text(ctx, "F = " + fmt(e.F) + " N", x, massY + 18, { align: "center", color: "#fff", font: "12px Leelawadee UI, Tahoma, sans-serif" });
+  text(ctx, "m = " + fmt(e.mEq) + " kg", x, massY + 34, { align: "center", color: "#d5e2ec", font: "12px Leelawadee UI, Tahoma, sans-serif" });
+  ctx.strokeStyle = "#5c6b7a"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(x + 48, topY + 10); ctx.lineTo(x + 48, topY + 10 + baseLen); ctx.stroke();
+  text(ctx, "L₀", x + 56, topY + 10 + baseLen / 2, { color: "#5c6b7a" });
+  if (state.showForces) {
+    arrow(ctx, x + 20, massY + 48, x + 20, massY + 48 + 54, "#b91c1c");
+    text(ctx, "F", x + 28, massY + 78, { color: "#b91c1c" });
+    if (!view.snapped) {
+      arrow(ctx, x - 16, yEnd - 8, x - 16, yEnd - 62, "#0f766e");
+      text(ctx, "T", x - 28, yEnd - 40, { color: "#0f766e", align: "right" });
+    }
+  }
+  roundRect(ctx, ix, 70, insetW, 168, 12);
+  ctx.fillStyle = "rgba(255,253,251,0.95)"; ctx.fill();
+  ctx.strokeStyle = "#e3d9cc"; ctx.stroke();
+  const icx = ix + insetW / 2;
+  text(ctx, "ภาพขยายปลายลวด", icx, 88, { align: "center", font: "bold 13px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+  ctx.strokeStyle = "#93a3b3"; ctx.setLineDash([3, 3]);
+  ctx.beginPath(); ctx.moveTo(icx - 22, 110); ctx.lineTo(icx - 22, 168); ctx.stroke();
+  ctx.setLineDash([]); ctx.strokeStyle = col; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(icx + 18, 110); ctx.lineTo(icx + 18, 168 + Math.min(48, vis * 220)); ctx.stroke();
+  text(ctx, "ΔL จริง " + fmtLen(e.dL), icx, 214, { align: "center", color: "#14324f" });
+  const banner = mag > 1.05 && !view.snapped
+    ? "ขยายภาพการยืด ×" + Math.round(mag)
+    : (view.snapped ? "เส้นลวดขาด" : "มาตราส่วนการยืดจริง");
+  chip(ctx, banner, 12, 12, view.snapped ? "#fee2e2" : "#fff");
+  const pct = e.lim.sigmaP > 0 ? Math.round(100 * e.sigma / e.lim.sigmaP) : 0;
+  const status = e.regime === "broken" ? "ขาดแล้ว" : e.regime === "plastic" ? "เลยช่วงฮุก" : "ช่วงยืดหยุ่น " + pct + "% ของขีดจำกัด";
+  chip(ctx, status, 12, 44, e.regime === "elastic" ? "#ecfdf5" : "#ffedd5");
+}
+
+function drawMode2(ctx, w, h, b) {
+  ctx.fillStyle = "#f4f8fb"; ctx.fillRect(0, 0, w, h);
+  const fluid = fluidVisual();
+  const side = w >= 640;
+  const tankX = 18, tankY = 128;
+  const tankBottom = side ? h - 18 : h - 156;
+  const tankWpx = side ? Math.min(360, w * 0.54) : w - 36;
+  const tankHpx = Math.max(120, tankBottom - tankY);
+  const yOf = (ym) => tankY + tankHpx - (ym / b.tankH) * tankHpx;
+  const xOf = (xm) => tankX + (xm / b.tankSide) * tankWpx;
+  const cx = xOf(b.tankSide / 2);
+  const scX = cx, scY = 40;
+  roundRect(ctx, scX - 48, scY, 96, 74, 10);
+  ctx.fillStyle = "#f7f1e6"; ctx.fill(); ctx.strokeStyle = "#14324f"; ctx.lineWidth = 1.5; ctx.stroke();
+  text(ctx, "ตาชั่งสปริง", scX, scY + 14, { align: "center", font: "bold 12px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+  const pivotY = scY + 62, dialR = 26;
+  ctx.beginPath(); ctx.arc(scX, pivotY, dialR, Math.PI, 2 * Math.PI, true); ctx.strokeStyle = "#14324f"; ctx.stroke();
+  const full = Math.max(b.W, 1e-6) * 1.15;
+  const ang = (val) => Math.PI + Math.PI * clamp(val / full, 0, 1);
+  const aW = ang(b.W), aT = ang(b.T);
+  ctx.strokeStyle = "#c45c12"; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(scX + Math.cos(aW) * 18, pivotY + Math.sin(aW) * 18);
+  ctx.lineTo(scX + Math.cos(aW) * 28, pivotY + Math.sin(aW) * 28);
+  ctx.stroke();
+  text(ctx, "W", scX + Math.cos(aW) * 36, pivotY + Math.sin(aW) * 36, { align: "center", color: "#c45c12", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  ctx.strokeStyle = "#b91c1c"; ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(scX, pivotY);
+  ctx.lineTo(scX + Math.cos(aT) * 22, pivotY + Math.sin(aT) * 22);
+  ctx.stroke();
+  ctx.beginPath(); ctx.arc(scX, pivotY, 3, 0, Math.PI * 2); ctx.fillStyle = "#b91c1c"; ctx.fill();
+  text(ctx, fmt(b.T) + " N", scX, scY + 30, { align: "center", font: "bold 12px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+
+  ctx.fillStyle = "#d7e2ea";
+  ctx.fillRect(tankX - 8, yOf(0) - 4, tankWpx + 16, 14);
+  const ySurf = yOf(view.hWater);
+  const yBot = yOf(0);
+  const grad = ctx.createLinearGradient(0, ySurf, 0, yBot);
+  grad.addColorStop(0, fluid.color); grad.addColorStop(1, fluid.deep);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  const amp = 1.6;
+  ctx.moveTo(tankX, yBot);
+  for (let px = tankX; px <= tankX + tankWpx; px += 4) {
+    ctx.lineTo(px, ySurf + Math.sin(px * 0.06 + view.wave * 2) * amp);
+  }
+  ctx.lineTo(tankX + tankWpx, yBot); ctx.closePath(); ctx.fill();
+  ctx.setLineDash([5, 4]); ctx.strokeStyle = "#405060"; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(tankX, yOf(b.h0)); ctx.lineTo(tankX + tankWpx, yOf(b.h0)); ctx.stroke();
+  ctx.setLineDash([]);
+  text(ctx, "ระดับเดิม", tankX + 6, yOf(b.h0) - 8, { color: "#405060", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+
+  const aPxH = (b.a / b.tankH) * tankHpx;
+  const aPxW = (b.a / b.tankSide) * tankWpx;
+  const objTop = yOf(view.objBottom + b.a);
+  const objLeft = cx - aPxW / 2;
+  roundRect(ctx, objLeft, objTop, aPxW, aPxH, 6);
+  ctx.fillStyle = cubeColor(b.rhoO); ctx.fill();
+  ctx.strokeStyle = "#2c3540"; ctx.lineWidth = 1.5; ctx.stroke();
+  const wetTop = Math.max(objTop, ySurf);
+  const wetBot = Math.min(objTop + aPxH, yBot);
+  if (wetBot > wetTop + 1) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(objLeft, wetTop, aPxW, wetBot - wetTop); ctx.clip();
+    ctx.fillStyle = fluid.color; ctx.globalAlpha = 0.38;
+    roundRect(ctx, objLeft, objTop, aPxW, aPxH, 6); ctx.fill();
+    ctx.restore(); ctx.globalAlpha = 1;
+  }
+  const hookX = cx, hookY = objTop;
+  ctx.strokeStyle = "#14324f"; ctx.lineWidth = 1.6;
+  if (b.T > 0.05) {
+    ctx.beginPath(); ctx.moveTo(scX, scY + 74); ctx.lineTo(hookX, hookY); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.moveTo(scX, scY + 74);
+    ctx.quadraticCurveTo(scX + 28, (scY + 74 + hookY) / 2, hookX, hookY);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = "#14324f"; ctx.lineWidth = 3;
+  ctx.strokeRect(tankX, tankY, tankWpx, tankHpx);
+  ctx.lineWidth = 1;
+  const depths = [0.22, 0.45, 0.68, 0.88];
+  depths.forEach((fr) => {
+    const depth = view.hWater * fr;
+    if (depth < 0.02) return;
+    const yy = yOf(view.hWater - depth);
+    if (yy < tankY + 8 || yy > yBot - 6) return;
+    const len = 10 + 28 * fr;
+    arrow(ctx, tankX + tankWpx - 6, yy, tankX + tankWpx - 6 - len, yy, "#10283f");
+  });
+  text(ctx, "P เพิ่มตามความลึก", tankX + 8, tankY + 16, { color: "#14324f", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  if (state.showForces) {
+    const maxF = Math.max(b.W, b.FB, b.T, b.FN, 1e-6);
+    const scale = 68 / maxF;
+    const ocx = cx, ocy = objTop + aPxH / 2;
+    arrow(ctx, ocx - 16, ocy, ocx - 16, ocy + b.W * scale, "#b91c1c");
+    text(ctx, "Fg", ocx - 16, ocy + b.W * scale + 12, { align: "center", color: "#b91c1c", font: "12px Leelawadee UI, Tahoma, sans-serif" });
+    if (b.FB > 1e-4) {
+      arrow(ctx, ocx + 16, ocy, ocx + 16, ocy - b.FB * scale, "#0f766e");
+      text(ctx, "FB", ocx + 16, ocy - b.FB * scale - 12, { align: "center", color: "#0f766e", font: "12px Leelawadee UI, Tahoma, sans-serif" });
+    }
+    if (b.FN > 1e-3) {
+      arrow(ctx, ocx, objTop + aPxH, ocx, objTop + aPxH - b.FN * scale, "#1d4ed8");
+      text(ctx, "FN", ocx + 8, objTop + aPxH - 8, { color: "#1d4ed8" });
+    }
+  }
+  for (let i = 0; i < 5; i++) {
+    const p = (view.bub + i / 5) % 1;
+    const by = yBot - p * Math.max(8, yBot - ySurf);
+    const bx = tankX + 16 + ((i * 47) % Math.max(20, tankWpx - 32));
+    ctx.strokeStyle = "rgba(255,255,255,0.7)";
+    ctx.beginPath(); ctx.arc(bx, by, 2 + (i % 3), 0, Math.PI * 2); ctx.stroke();
+  }
+  const dhShow = Math.max(0, view.hWater - b.h0);
+  text(ctx, "Δh = " + (dhShow * 1000).toFixed(1) + " mm", tankX + 8, Math.max(tankY + 28, ySurf - 12), { color: "#14324f", font: "bold 12px Leelawadee UI, Tahoma, sans-serif" });
+
+  const px = side ? tankX + tankWpx + 28 : 16;
+  const py = side ? tankY : h - 146;
+  const pw = side ? Math.max(120, w - px - 14) : w - 32;
+  roundRect(ctx, px, py, pw, side ? tankHpx : 136, 12);
+  ctx.fillStyle = "rgba(255,253,251,0.94)"; ctx.fill(); ctx.strokeStyle = "#e3d9cc"; ctx.stroke();
+  text(ctx, "พาราดอกซ์ของไฮโดรสแตติก", px + pw / 2, py + 16, { align: "center", font: "bold 13px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+  const base = py + (side ? tankHpx - 28 : 112);
+  const waterH = side ? Math.min(120, tankHpx * 0.45) : 48;
+  function vessel(vx, vw) {
+    ctx.strokeStyle = "#14324f"; ctx.lineWidth = 2;
+    ctx.strokeRect(vx, base - waterH - 36, vw, waterH + 36);
+    ctx.fillStyle = fluid.color;
+    ctx.fillRect(vx + 1, base - waterH, vw - 2, waterH);
+    text(ctx, fmt(b.Pg / 1000) + " kPa", vx + vw / 2, base + 12, { align: "center", font: "11px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+  }
+  const gap = 28;
+  const vw1 = Math.min(78, (pw - gap - 36) * 0.62);
+  const vw2 = Math.min(34, (pw - gap - 36) * 0.28);
+  const x1 = px + 16, x2 = px + pw - 16 - vw2;
+  vessel(x1, vw1); vessel(x2, vw2);
+  text(ctx, "=", (x1 + vw1 + x2) / 2, base - waterH / 2, { align: "center", font: "bold 22px Leelawadee UI, Tahoma, sans-serif", color: "#0f766e" });
+  text(ctx, "h เท่ากัน → P เท่ากัน", px + pw / 2, py + 34, { align: "center", color: "#5c6b7a", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+}
+
+function drawMode3(ctx, w, h, info) {
+  ctx.fillStyle = "#f4f8fb"; ctx.fillRect(0, 0, w, h);
+  const fluid = fluidVisual();
+  const insetW = Math.min(184, Math.max(150, w * 0.32));
+  const tubeW = Math.min(150, Math.max(96, w - insetW - 36));
+  const groupW = tubeW + 16 + insetW;
+  const x0 = Math.max(12, (w - groupW) / 2);
+  const left = x0 + tubeW / 2;
+  const x1 = x0 + tubeW;
+  const noteCount = 1 + (ball.onFloor ? 1 : 0) + (timeScale() < 0.92 ? 1 : 0);
+  const top = 28, bottom = h - (18 + noteCount * 30);
+  const yMin = -0.2, yMax = 0.9;
+  const Y = (y) => top + (y - yMin) / (yMax - yMin) * (bottom - top);
+  const yS = Y(0), yF = Y(0.8);
+  const grad = ctx.createLinearGradient(0, yS, 0, yF);
+  grad.addColorStop(0, fluid.color); grad.addColorStop(1, fluid.deep);
+  ctx.fillStyle = grad;
+  ctx.fillRect(x0, yS, tubeW, yF - yS);
+  ctx.strokeStyle = "rgba(255,255,255,0.45)"; ctx.lineWidth = 1;
+  for (let i = 0; i < 7; i++) {
+    const yy = yS + ((view.wave * 18 + i * 28) % Math.max(20, yF - yS));
+    ctx.beginPath(); ctx.moveTo(x0 + 10, yy); ctx.lineTo(x1 - 10, yy); ctx.stroke();
+  }
+  ctx.strokeStyle = "#14324f"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(x0, top + 8); ctx.lineTo(x0, yF); ctx.lineTo(x1, yF); ctx.lineTo(x1, top + 8); ctx.stroke();
+  ctx.setLineDash([5, 4]); ctx.strokeStyle = "#405060"; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(x0, yS); ctx.lineTo(x1, yS); ctx.stroke();
+  ctx.setLineDash([]);
+  text(ctx, "ผิวของเหลว", x0 + 8, Math.max(top + 16, yS - 12), { color: "#405060" });
+  const rPx = clamp(tubeW * 0.16 + state.radius * 700, 14, tubeW * 0.32);
+  const by = Y(ball.y);
+  const f = info.forces;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(x0 + 2, top, tubeW - 4, yF - top); ctx.clip();
+  ctx.fillStyle = cubeColor(state.rhoObj);
+  ctx.beginPath(); ctx.arc(left, by, rPx, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "#243140"; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,0.35)";
+  ctx.beginPath(); ctx.arc(left - rPx * 0.3, by - rPx * 0.3, rPx * 0.28, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  if (f.hSub > 0 && f.hSub < 2 * state.radius && Math.abs(by - yS) < rPx) {
+    const half = Math.sqrt(Math.max(0, rPx * rPx - (by - yS) * (by - yS)));
+    ctx.strokeStyle = "#f8fafc"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(left - half, yS); ctx.lineTo(left + half, yS); ctx.stroke();
+  }
+  if (state.showForces) {
+    const FN = ball.onFloor ? Math.max(0, f.Fg - f.Fb) : 0;
+    const maxF = Math.max(f.Fg, f.Fb, Math.abs(f.Fv), FN, 1e-8);
+    const sc = 64 / maxF;
+    arrow(ctx, left - 18, by, left - 18, by + f.Fg * sc, "#b91c1c");
+    text(ctx, "Fg", left - 18, by + f.Fg * sc + 12, { align: "center", color: "#b91c1c" });
+    if (f.Fb > 1e-8) {
+      arrow(ctx, left + 18, by, left + 18, by - f.Fb * sc, "#0f766e");
+      text(ctx, "FB", left + 22, by - f.Fb * sc - 10, { color: "#0f766e" });
+    }
+    if (Math.abs(f.Fv) > 1e-8) {
+      const dir = f.Fv > 0 ? -1 : 1;
+      arrow(ctx, left + 40, by, left + 40, by + dir * Math.abs(f.Fv) * sc, "#7c3aed");
+      text(ctx, "Fv", left + 48, by + dir * Math.abs(f.Fv) * sc, { color: "#7c3aed" });
+    }
+    if (FN > 1e-6) {
+      arrow(ctx, left, by + rPx, left, by + rPx - FN * sc, "#1d4ed8");
+      text(ctx, "FN", left + 8, by + rPx - 10, { color: "#1d4ed8" });
+    }
+  }
+  const vWord = ball.v > 0.005 ? "ลง" : ball.v < -0.005 ? "ขึ้น" : "นิ่ง";
+  const vLabelY = by + rPx + 18 > bottom - 4 ? by - rPx - 16 : by + rPx + 18;
+  text(ctx, "v = " + fmt(ball.v) + " m/s (" + vWord + ")", left, vLabelY, { align: "center", color: "#14324f", font: "bold 12px Leelawadee UI, Tahoma, sans-serif" });
+  const ix = x1 + 16;
+  const iw = Math.min(insetW, w - ix - 10);
+  roundRect(ctx, ix, 48, iw, 176, 12);
+  ctx.fillStyle = "rgba(255,253,251,0.96)"; ctx.fill(); ctx.strokeStyle = "#e3d9cc"; ctx.stroke();
+  const icx = ix + iw / 2;
+  text(ctx, "แรงตึงผิวที่ผิว", icx, 66, { align: "center", font: "bold 13px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+  ctx.fillStyle = cubeColor(state.rhoObj);
+  ctx.beginPath(); ctx.arc(icx, 118, 28, 0, Math.PI * 2); ctx.fill();
+  ctx.save();
+  ctx.beginPath(); ctx.rect(ix + 8, 118, iw - 16, 40); ctx.clip();
+  ctx.fillStyle = fluid.color;
+  ctx.globalAlpha = 0.55;
+  ctx.beginPath(); ctx.arc(icx, 118, 28, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = "#14324f"; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(ix + 16, 118); ctx.lineTo(ix + iw - 16, 118); ctx.stroke();
+  arrow(ctx, icx - 28, 118, icx - 28, 96, "#c45c12");
+  arrow(ctx, icx + 28, 118, icx + 28, 96, "#c45c12");
+  const Fgmm = state.gamma * 2 * Math.PI * state.radius;
+  text(ctx, "Fγ = " + fmt(Fgmm) + " N", icx, 176, { align: "center", color: "#14324f" });
+  text(ctx, "γ·2πr", icx, 196, { align: "center", color: "#5c6b7a", font: "12px Leelawadee UI, Tahoma, sans-serif" });
+  let noteY = h - 34;
+  if (ball.onFloor) { chip(ctx, "ถึงก้นภาชนะ", 12, noteY, "#e0f2fe"); noteY -= 32; }
+  const slow = timeScale();
+  if (slow < 0.92) { chip(ctx, "เวลาบนจอช้ากว่าจริง " + Math.round(1 / slow) + " เท่า", 12, noteY, "#fff7ed"); noteY -= 32; }
+  chip(ctx, "r จริง " + fmt(state.radius * 100, 2) + " cm · ภาพลูกกลมขยาย", 12, noteY);
+}
+
+function halfH(A) { return Math.max(8, A * 64); }
+function drawMode4(ctx, w, h, flow) {
+  ctx.fillStyle = "#f4f8fb"; ctx.fillRect(0, 0, w, h);
+  const fluid = fluidVisual();
+  const x0 = 54, x1 = w - 36, L = x1 - x0;
+  const hRef = Math.min(flow.h1, flow.h2);
+  const span = Math.max(flow.h1, flow.h2) - hRef;
+  const pxPerElev = span > 0.001 ? Math.min(34, 70 / span) : 0;
+  const baseY = h * 0.58;
+  const centerY = (s) => baseY - (elevProfile(s) - hRef) * pxPerElev;
+  const pt = (s, lane) => {
+    const hh = halfH(areaProfile(s));
+    return { x: x0 + s * L, y: centerY(s) + lane * hh, hh };
+  };
+  const samples = [];
+  let pMin = Infinity, pMax = -Infinity;
+  for (let i = 0; i <= 80; i++) {
+    const s = i / 80;
+    const P = pressureAtS(s, flow);
+    samples.push(P);
+    if (P < pMin) pMin = P;
+    if (P > pMax) pMax = P;
+  }
+  function heat(P) {
+    const t = (P - pMin) / (pMax - pMin || 1);
+    return "hsl(" + (210 - t * 200) + ", 72%, 46%)";
+  }
+  if (state.showFlow) {
+    for (let i = 0; i < 80; i++) {
+      const s0 = i / 80, s1 = (i + 1) / 80;
+      const a = pt(s0, 0), b = pt(s1, 0);
+      const topA = pt(s0, -1), botA = pt(s0, 1), topB = pt(s1, -1), botB = pt(s1, 1);
+      ctx.fillStyle = heat(samples[i]);
+      ctx.beginPath();
+      ctx.moveTo(topA.x, topA.y); ctx.lineTo(topB.x, topB.y); ctx.lineTo(botB.x, botB.y); ctx.lineTo(botA.x, botA.y);
+      ctx.closePath(); ctx.fill();
+    }
+  } else {
+    ctx.fillStyle = fluid.color;
+    ctx.beginPath();
+    let p = pt(0, -1); ctx.moveTo(p.x, p.y);
+    for (let i = 1; i <= 60; i++) { p = pt(i / 60, -1); ctx.lineTo(p.x, p.y); }
+    for (let i = 60; i >= 0; i--) { p = pt(i / 60, 1); ctx.lineTo(p.x, p.y); }
+    ctx.closePath(); ctx.fill();
+  }
+  ctx.beginPath();
+  let q = pt(0, -1); ctx.moveTo(q.x, q.y);
+  for (let i = 1; i <= 60; i++) { q = pt(i / 60, -1); ctx.lineTo(q.x, q.y); }
+  q = pt(1, 1); ctx.lineTo(q.x, q.y);
+  for (let i = 59; i >= 0; i--) { q = pt(i / 60, 1); ctx.lineTo(q.x, q.y); }
+  ctx.closePath();
+  ctx.strokeStyle = "#14324f"; ctx.lineWidth = 2.5; ctx.stroke();
+  if (state.showFlow) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineWidth = 1.3;
+    ctx.setLineDash([7, 8]); ctx.lineDashOffset = -view.dash;
+    for (let lane = -0.72; lane <= 0.72; lane += 0.36) {
+      ctx.beginPath();
+      for (let i = 0; i <= 50; i++) {
+        const p = pt(i / 50, lane);
+        if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+    particles.forEach((p) => {
+      const loc = pt(clamp(p.s, 0, 1), p.lane);
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.beginPath(); ctx.arc(loc.x, loc.y, 2.2, 0, Math.PI * 2); ctx.fill();
+    });
+    const legX = 14, legY = 16;
+    const lg = ctx.createLinearGradient(legX, 0, legX + 90, 0);
+    lg.addColorStop(0, heat(pMin)); lg.addColorStop(1, heat(pMax));
+    ctx.fillStyle = lg; roundRect(ctx, legX, legY, 90, 10, 5); ctx.fill();
+    text(ctx, "P ต่ำ", legX, legY + 20, { font: "11px Leelawadee UI, Tahoma, sans-serif", color: "#1d4ed8" });
+    text(ctx, "P สูง", legX + 64, legY + 20, { font: "11px Leelawadee UI, Tahoma, sans-serif", color: "#b91c1c" });
+  }
+  function stand(s, head, name) {
+    const tap = pt(s, -1);
+    const room = Math.max(36, tap.y - 30);
+    const maxHead = Math.max(flow.head1, flow.head2, 0.25);
+    const pxPerM = Math.min(80, room / maxHead);
+    const col = Math.max(8, head * pxPerM);
+    const top = tap.y - col;
+    ctx.strokeStyle = "rgba(20,50,79,0.75)"; ctx.lineWidth = 2;
+    ctx.strokeRect(tap.x - 7, 26, 14, tap.y - 26);
+    ctx.fillStyle = fluid.color;
+    ctx.fillRect(tap.x - 5, top, 10, tap.y - top);
+    text(ctx, name, tap.x, top - 18, { align: "center", font: "bold 12px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+    text(ctx, head.toFixed(2) + " m", tap.x, top - 6, { align: "center", font: "11px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+    const axis = pt(s, 0);
+    const crowded = (x1 - x0) < 460;
+    const capY = axis.y + halfH(areaProfile(s)) + 16 + (crowded && s >= 0.3 ? 40 : 0);
+    ctx.fillStyle = "rgba(255,253,251,0.88)";
+    roundRect(ctx, axis.x - 42, capY - 12, 84, 32, 6); ctx.fill();
+    text(ctx, s < 0.3 ? "v₁ " + fmt(flow.v1) : "v₂ " + fmt(flow.v2), axis.x, capY, { align: "center", color: "#14324f", font: "bold 12px Leelawadee UI, Tahoma, sans-serif" });
+    text(ctx, s < 0.3 ? "A₁ " + fmt(flow.A1, 2) : "A₂ " + fmt(flow.A2, 2), axis.x, capY + 14, { align: "center", color: "#5c6b7a", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  }
+  stand(0.11, flow.head1, "จุด 1");
+  stand(0.49, flow.head2, "คอท่อ");
+  arrow(ctx, x0 - 28, baseY, x0 - 8, baseY, "#14324f");
+  text(ctx, "การไหล", x0 - 30, baseY - 14, { color: "#14324f", font: "12px Leelawadee UI, Tahoma, sans-serif" });
+  text(ctx, "ผ่านจุด 1: " + flux1 + "    ผ่านคอท่อ: " + flux2, 14, h - 16, { color: "#14324f", font: "12px Leelawadee UI, Tahoma, sans-serif" });
+  if (Math.abs(flow.h2 - flow.h1) > 0.05) {
+    text(ctx, "h₁ = " + fmt(flow.h1, 1) + " m   h₂ = " + fmt(flow.h2, 1) + " m", w - 14, h - 16, { align: "right", color: "#5c6b7a" });
+  }
+  if (state.showForces) {
+    const sL = 0.28, sR = 0.36, sM = 0.32;
+    const PL = pressureAtS(sL, flow), PR = pressureAtS(sR, flow);
+    const mid = pt(sM, 0);
+    const pLo = Math.min(PL, PR);
+    const pSpan = Math.max(PL, PR) - pLo;
+    const lenL = 14 + (pSpan > 1 ? 46 * (PL - pLo) / pSpan : 0);
+    const lenR = 14 + (pSpan > 1 ? 46 * (PR - pLo) / pSpan : 0);
+    arrow(ctx, mid.x - 8 - lenL, mid.y - mid.hh - 28, mid.x - 8, mid.y - mid.hh - 28, "#b91c1c");
+    arrow(ctx, mid.x + 8 + lenR, mid.y - mid.hh - 46, mid.x + 8, mid.y - mid.hh - 46, "#1d4ed8");
+    text(ctx, "แรงจากความดันสองด้านของก้อนของไหล", mid.x, mid.y - mid.hh - 62, { align: "center", color: "#14324f", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  }
+}
+
+function graphElastic(ctx, w, h, e) {
+  const box = { x0: 62, y0: 36, x1: w - 16, y1: h - 42 };
+  box.pw = box.x1 - box.x0; box.ph = box.y1 - box.y0;
+  const lim = e.lim;
+  const eRight = lim.epsBreak;
+  const broken = eRight / Math.max(e.epsP, 1e-12) > 8;
+  const eLeft = broken ? e.epsP * 1.35 : eRight * 1.05;
+  const toT = (eps) => {
+    if (!broken) return clamp(eps / Math.max(eLeft, eRight), 0, 1);
+    if (eps <= eLeft) return 0.6 * clamp(eps / eLeft, 0, 1);
+    return 0.6 + 0.4 * clamp((eps - eLeft) / (eRight - eLeft), 0, 1);
+  };
+  const X = (eps) => box.x0 + toT(eps) * box.pw;
+  const yMax = lim.sigmaU * 1.12;
+  const Y = (sig) => box.y1 - clamp(sig / yMax, 0, 1) * box.ph;
+  ctx.fillStyle = "#fffdfb"; ctx.fillRect(0, 0, w, h);
+  text(ctx, "ความเค้น–ความเครียด", 12, 16, { font: "bold 13px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+  ctx.strokeStyle = "#efe6da"; ctx.lineWidth = 1;
+  ctx.strokeRect(box.x0, box.y0, box.pw, box.ph);
+  ctx.save(); ctx.beginPath(); ctx.rect(box.x0, box.y0, box.pw, box.ph); ctx.clip();
+  ctx.beginPath(); ctx.strokeStyle = "#0f6e8c"; ctx.lineWidth = 2.4;
+  for (let i = 0; i <= 40; i++) {
+    const sig = lim.sigmaP * (i / 40);
+    const eps = strainFromStress(sig, e.Y, lim).eps;
+    const x = X(eps), y = Y(sig);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.beginPath(); ctx.setLineDash([5, 4]); ctx.strokeStyle = "#ea580c";
+  for (let i = 0; i <= 40; i++) {
+    const sig = lim.sigmaP + (lim.sigmaU - lim.sigmaP) * (i / 40);
+    const eps = strainFromStress(Math.min(sig, lim.sigmaU * 0.999), e.Y, lim).eps;
+    const x = X(eps), y = Y(sig);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke(); ctx.setLineDash([]);
+  ctx.restore();
+  const xP = X(e.epsP), yP = Y(lim.sigmaP);
+  const xB = X(eRight), yB = Y(lim.sigmaU);
+  ctx.fillStyle = "#b45309";
+  ctx.beginPath(); ctx.arc(xP, yP, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "#b91c1c"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(xB - 5, yB - 5); ctx.lineTo(xB + 5, yB + 5); ctx.moveTo(xB + 5, yB - 5); ctx.lineTo(xB - 5, yB + 5); ctx.stroke();
+  const xC = X(e.eps), yC = Y(Math.min(e.sigma, lim.sigmaU));
+  ctx.fillStyle = e.regime === "elastic" ? "#14324f" : "#b91c1c";
+  ctx.beginPath(); ctx.arc(xC, yC, 5.5, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.stroke();
+  if (broken) {
+    const sx = box.x0 + 0.6 * box.pw;
+    ctx.strokeStyle = "#fffdfb"; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(sx, box.y1 + 1); ctx.lineTo(sx, box.y1 + 8); ctx.stroke();
+    ctx.strokeStyle = "#14324f"; ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(sx - 6, box.y1 + 10); ctx.lineTo(sx - 2, box.y1 + 2); ctx.lineTo(sx + 2, box.y1 + 10); ctx.lineTo(sx + 6, box.y1 + 2);
+    ctx.stroke();
+  }
+  text(ctx, "ε", box.x1, h - 14, { align: "right", color: "#5c6b7a" });
+  text(ctx, "σ (" + (yMax >= 1e6 ? "ถึง " + fmt(yMax / 1e6) + " MPa" : "Pa") + ")", box.x0, 28, { color: "#5c6b7a", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  text(ctx, "จุดขีดจำกัด", xP, Math.max(box.y0 + 10, yP - 10), { align: "center", color: "#b45309", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  text(ctx, "จุดแตกหัก", Math.min(box.x1 - 8, xB), Math.max(box.y0 + 10, yB - 12), { align: "right", color: "#b91c1c", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  text(ctx, "เส้นประหลังขีดจำกัดเป็นแนวโน้มเชิงคุณภาพ", 12, h - 12, { color: "#5c6b7a", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+}
+function graphBuoy(ctx, w, h, b) {
+  const box = { x0: 58, y0: 28, x1: w - 14, y1: h - 36 };
+  box.pw = box.x1 - box.x0; box.ph = box.y1 - box.y0;
+  const fbFull = b.rhoF * b.V * g;
+  const yMax = Math.max(b.W, fbFull, 1e-6) * 1.18;
+  const xMax = b.a * 1.28;
+  const X = (hh) => box.x0 + (hh / xMax) * box.pw;
+  const Y = (F) => box.y1 - (F / yMax) * box.ph;
+  ctx.fillStyle = "#fffdfb"; ctx.fillRect(0, 0, w, h);
+  text(ctx, "แรงลอยตัวเทียบระยะจม", 12, 14, { font: "bold 13px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+  ctx.strokeStyle = "#efe6da"; ctx.strokeRect(box.x0, box.y0, box.pw, box.ph);
+  ctx.beginPath(); ctx.strokeStyle = "#0f6e8c"; ctx.lineWidth = 2.4;
+  ctx.moveTo(X(0), Y(0)); ctx.lineTo(X(b.a), Y(fbFull)); ctx.lineTo(X(b.a * 1.22), Y(fbFull)); ctx.stroke();
+  ctx.setLineDash([5, 4]); ctx.strokeStyle = "#c45c12"; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(box.x0, Y(b.W)); ctx.lineTo(box.x1, Y(b.W)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "#14324f";
+  ctx.beginPath(); ctx.arc(X(b.hSub), Y(b.FB), 5.5, 0, Math.PI * 2); ctx.fill();
+  text(ctx, "h (m)", box.x1, h - 12, { align: "right", color: "#5c6b7a", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  text(ctx, "FB น้ำเงิน · W ส้ม", 12, h - 12, { color: "#5c6b7a", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  if (b.status === "ลอย") text(ctx, "จุดตัดคือภาวะลอย", X(b.hSub), Y(b.FB) - 12, { align: "center", color: "#14324f", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  else if (b.status === "สมดุลกลางน้ำ") text(ctx, "จมมิดและน้ำหนักเท่าแรงลอยตัว", box.x0 + 8, box.y0 + 14, { color: "#14324f", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  else text(ctx, "แรงลอยตัวเต็มก้อนน้อยกว่าน้ำหนัก จึงจม", box.x0 + 8, box.y0 + 14, { color: "#14324f", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+}
+function graphFall(ctx, w, h, info) {
+  const box = { x0: 54, y0: 28, x1: w - 14, y1: h - 34 };
+  box.pw = box.x1 - box.x0; box.ph = box.y1 - box.y0;
+  const vt = info.vt, tau = Math.max(info.tau, 1e-4);
+  let vHi = 0.2, vLo = -0.2;
+  ball.hist.forEach((p) => { vHi = Math.max(vHi, p.v); vLo = Math.min(vLo, p.v); });
+  let showVt = Math.abs(vt) <= Math.max(vHi, -vLo, 0.2) * 4;
+  if (showVt) { vHi = Math.max(vHi, vt); vLo = Math.min(vLo, vt); }
+  vHi *= 1.2; vLo *= 1.2;
+  if (!(vHi > vLo + 1e-6)) { vLo = -0.2; vHi = 0.2; }
+  if (vHi < 0.2) vHi = 0.2;
+  const tMax = Math.max(ball.t * 1.05, Math.min(8 * tau, 12), 0.8);
+  const X = (t) => box.x0 + clamp(t / tMax, 0, 1) * box.pw;
+  const Y = (v) => box.y1 - (v - vLo) / (vHi - vLo) * box.ph;
+  ctx.fillStyle = "#fffdfb"; ctx.fillRect(0, 0, w, h);
+  text(ctx, "ความเร็วเทียบเวลา (เวลาจริง)", 12, 14, { font: "bold 13px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+  ctx.strokeStyle = "#efe6da"; ctx.strokeRect(box.x0, box.y0, box.pw, box.ph);
+  ctx.save(); ctx.beginPath(); ctx.rect(box.x0, box.y0, box.pw, box.ph); ctx.clip();
+  ctx.setLineDash([5, 4]); ctx.strokeStyle = "#0f6e8c"; ctx.lineWidth = 1.8; ctx.beginPath();
+  for (let i = 0; i <= 60; i++) {
+    const t = tMax * i / 60;
+    const v = vt * (1 - Math.exp(-t / tau));
+    const x = X(t), y = Y(v);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke(); ctx.setLineDash([]);
+  if (showVt) {
+    ctx.strokeStyle = "#94a3b8"; ctx.setLineDash([2, 3]);
+    ctx.beginPath(); ctx.moveTo(box.x0, Y(vt)); ctx.lineTo(box.x1, Y(vt)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.strokeStyle = "#c45c12"; ctx.lineWidth = 2.2; ctx.beginPath();
+  ball.hist.forEach((p, i) => {
+    const x = X(p.t), y = Y(p.v);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  const lastP = ball.hist[ball.hist.length - 1];
+  ctx.fillStyle = "#14324f"; ctx.beginPath(); ctx.arc(X(lastP.t), Y(lastP.v), 4.5, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  text(ctx, "t (s)", box.x1, h - 10, { align: "right", color: "#5c6b7a", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  text(ctx, showVt ? "เส้นประ = จมมิดตลอด" : "vₜ อยู่นอกสเกล", 12, h - 10, { color: "#5c6b7a", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+}
+function graphFlow(ctx, w, h, flow) {
+  ctx.fillStyle = "#fffdfb"; ctx.fillRect(0, 0, w, h);
+  const gap = 22;
+  const topH = (h - 28) / 2;
+  function panel(y0, y1, title, color, getter, unit) {
+    const box = { x0: 52, y0: y0 + 18, x1: w - 12, y1: y1 - 8 };
+    box.pw = box.x1 - box.x0; box.ph = box.y1 - box.y0;
+    let lo = Infinity, hi = -Infinity;
+    const vals = [];
+    for (let i = 0; i <= 80; i++) {
+      const v = getter(i / 80);
+      vals.push(v);
+      if (v < lo) lo = v; if (v > hi) hi = v;
+    }
+    const pad = (hi - lo) * 0.15 || 1;
+    lo -= pad; hi += pad;
+    const X = (s) => box.x0 + s * box.pw;
+    const Y = (v) => box.y1 - (v - lo) / (hi - lo) * box.ph;
+    text(ctx, title, 12, y0 + 10, { font: "bold 12px Leelawadee UI, Tahoma, sans-serif", color: "#14324f" });
+    ctx.strokeStyle = "#efe6da"; ctx.strokeRect(box.x0, box.y0, box.pw, box.ph);
+    ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2.2;
+    vals.forEach((v, i) => { const x = X(i / 80), y = Y(v); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+    ctx.stroke();
+    [0.11, 0.49].forEach((s) => {
+      ctx.strokeStyle = "#d6d3d1"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(X(s), box.y0); ctx.lineTo(X(s), box.y1); ctx.stroke();
+    });
+    text(ctx, unit, box.x0, y0 + 10, { align: "left", color: "#5c6b7a", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+  }
+  panel(4, topH, "ความดันเกจตามแนวท่อ", "#b91c1c", (s) => (pressureAtS(s, flow) - P0) / 1000, "");
+  panel(topH + gap, h - 16, "อัตราเร็วตามแนวท่อ", "#0f6e8c", (s) => flow.Q / areaProfile(s), "");
+  text(ctx, "ตำแหน่งตามท่อ →   เส้นตั้งคือจุด 1 และคอท่อ", w - 12, h - 8, { align: "right", color: "#5c6b7a", font: "11px Leelawadee UI, Tahoma, sans-serif" });
+}
+function drawGraph(ctx, w, h, model) {
+  if (w < 30 || h < 30) return;
+  if (model.mode === 1) graphElastic(ctx, w, h, model.e);
+  else if (model.mode === 2) graphBuoy(ctx, w, h, model.b);
+  else if (model.mode === 3) graphFall(ctx, w, h, model.ball);
+  else graphFlow(ctx, w, h, model.flow);
+}
+function drawSim(ctx, w, h, model) {
+  if (w < 30 || h < 30) return;
+  ctx.clearRect(0, 0, w, h);
+  ctx.setLineDash([]);
+  ctx.lineJoin = "round"; ctx.lineCap = "round";
+  if (model.mode === 1) drawMode1(ctx, w, h, model.e);
+  else if (model.mode === 2) drawMode2(ctx, w, h, model.b);
+  else if (model.mode === 3) drawMode3(ctx, w, h, model.ball);
+  else drawMode4(ctx, w, h, model.flow);
+}
+
+function frac(num, den) {
+  return '<span class="frac"><span class="num">' + num + "</span><span class=\"den\">" + den + "</span></span>";
+}
+function card(lbl, val, unit) {
+  return '<article class="card"><div class="lbl">' + lbl + '</div><div class="val">' + val + '</div><div class="unit">' + unit + "</div></article>";
+}
+function renderPanels(model) {
+  const mode = model.mode;
+  const objectives = {
+    1: "สำรวจความเค้น ความเครียด และมอดุลัสของยัง ตามกฎของฮุก F = kΔL",
+    2: "ดูความดันที่ขึ้นกับความลึก และแรงลอยตัวที่ขึ้นกับปริมาตรส่วนที่จม",
+    3: "สังเกตลูกกลมในของเหลวหนืดจนถึงความเร็วปลาย และขนาดแรงตึงผิว",
+    4: "ตรวจความต่อเนื่องและแบร์นูลลีในท่อเวนจูรี ท่อแคบแล้วเร็วขึ้น แต่ความดันลดลง"
+  };
+  $("objective").textContent = objectives[mode];
+  const warnings = [];
+  let cards = "", eq = "", analysis = "", mis = "", cap = "", assume = "";
+  if (mode === 1) {
+    const e = model.e;
+    cards = card("ความเค้น σ", fmt(e.sigma), "Pa") + card("ความเครียด ε", fmt(e.eps), "ไม่มีหน่วย") + card("ระยะยืด ΔL", e.regime === "broken" ? "ขาด" : fmtLen(e.dL), e.regime === "broken" ? "เกินขีดจำกัดสูงสุด" : "") + card("มอดุลัสของยัง Y", fmt(e.Y), "Pa");
+    const hooke = e.regime === "elastic";
+    eq = '<div class="line">σ = ' + frac("F", "A") + " = " + fmt(e.F) + " / " + fmt(e.A) + ' = <span class="ans">' + fmt(e.sigma) + " Pa</span></div>";
+    eq += '<div class="line">ε = ' + frac("ΔL", "L₀") + " = " + fmtLen(e.dL) + " / " + fmt(e.L0, 2) + ' m = <span class="ans">' + fmt(e.eps) + "</span></div>";
+    if (hooke) {
+      eq += '<div class="line">ΔL = ' + frac("F L₀", "A Y") + ' = <span class="ans">' + fmtLen(e.dL) + "</span></div>";
+    } else if (e.regime === "broken") {
+      eq += '<div class="line">ความเค้นเกินขีดจำกัดสูงสุดแล้ว เส้นลวดขาด กฎของฮุกใช้ไม่ได้</div>';
+    } else {
+      const hookeDl = e.F * e.L0 / (e.A * e.Y);
+      eq += '<div class="line">ช่วงนี้เลยขีดจำกัดการแปรผันตรง ถ้าฝืนใช้ฮุกจะได้ ΔL = ' + fmtLen(hookeDl) + ' แต่แนวโน้มบนกราฟคือ <span class="ans">' + fmtLen(e.dL) + "</span></div>";
+    }
+    eq += '<div class="line">k = YA/L₀ = <span class="ans">' + fmt(e.k) + " N/m</span> · m = F/g = " + fmt(e.mEq) + " kg</div>";
+    const regimeText = e.regime === "elastic" ? "อยู่ในช่วงยืดหยุ่น กฎของฮุกใช้ได้" : e.regime === "plastic" ? "เลยขีดจำกัดการแปรผันตรง กฎของฮุกใช้โดยตรงไม่ได้แล้ว" : "ความเค้นถึงขีดจำกัดสูงสุด เส้นลวดขาด";
+    analysis = paras([
+      "<b>" + regimeText + "</b>",
+      "ความเค้นตอนนี้เป็น " + fmt(100 * e.sigma / e.lim.sigmaP, 1) + "% ของขีดจำกัดการแปรผันตรง (" + fmt(e.lim.sigmaP) + " Pa) และ " + fmt(100 * e.sigma / e.lim.sigmaU, 1) + "% ของจุดแตกหัก",
+      hooke ? "ตรวจ F กับ kΔL: kΔL = " + fmt(e.k * e.dL) + " N ตรงกับแรงที่แขวน " + fmt(e.F) + " N" : "ความชัน σ/ε ขณะนี้ไม่เท่ากับมอดุลัสของยังของวัสดุ เพราะเลยช่วงเส้นตรงแล้ว",
+      "ถ้าเพิ่มพื้นที่หน้าตัดเป็นสองเท่าโดยแรงเท่าเดิม ความเค้นจะลดลงครึ่งหนึ่ง และระยะยืดจะลดลงครึ่งหนึ่งในช่วงฮุก"
+    ]);
+    if (e.regime === "broken") warnings.push("เส้นลวดขาด เพราะความเค้นถึงขีดจำกัดสูงสุด " + fmt(e.lim.sigmaU) + " Pa");
+    else if (e.regime === "plastic") warnings.push("เกินขีดจำกัดการแปรผันตรงแล้ว กราฟช่วงเส้นประเป็นเพียงแนวโน้มให้เห็นจุดแตกหัก ไม่ใช่สมการวัสดุที่ใช้คำนวณจริง");
+    mis = paras([
+      e.regime === "elastic"
+        ? "ความเค้น σ = F/A ไม่ขึ้นกับความยาวเดิม เส้นที่ยาวกว่าจะได้ระยะยืด ΔL มากกว่า แต่ความเค้นเท่าเดิมถ้าแรงและพื้นที่เท่ากัน ส่วนเส้นที่หน้าตัดใหญ่ขึ้นจะยืดได้น้อยลง"
+        : "กฎของฮุกใช้ได้เฉพาะเมื่อความเค้นไม่เกินขีดจำกัดการแปรผันตรง นอกช่วงนั้นระยะยืดไม่แปรผันตรงกับแรงอีกต่อไป และถ้านับถึงขีดจำกัดสูงสุดเส้นลวดจะขาด",
+      "ค่า Y มากหมายถึงวัสดุต้านการยืดได้มาก เหล็กจึงยืดน้อยมากจนต้องขยายภาพ ส่วนยางยืดให้เห็นด้วยตามาตราส่วนจริง"
+    ]);
+    cap = "แกนความเครียดของโลหะถูกแบ่งสเกล เพื่อให้ทั้งช่วงฮุกและจุดแตกหักอยู่ในกราฟเดียวกัน";
+    assume = "สมมติเส้นลวดหน้าตัดสม่ำเสมอ แรงตามแนวยาว กราฟหลังขีดจำกัดการแปรผันตรงเป็นการชี้แนวโน้มเชิงคุณภาพจนถึงจุดแตกหัก";
+  } else if (mode === 2) {
+    const b = model.b;
+    cards = card("ความดันเกจ P_g", fmt(b.Pg), "Pa") + card("ความดันสัมบูรณ์ P", fmt(b.P), "Pa") + card("แรงลอยตัว F_B", fmt(b.FB), "N") + card("ปริมาตรส่วนที่จม V_sub", fmt(b.Vsub), "m³");
+    eq = '<div class="line">P = P₀ + ρgh = ' + fmt(P0) + " + " + fmt(b.rhoF) + "×" + fmt(g, 2) + "×" + fmt(b.hWater, 3) + ' = <span class="ans">' + fmt(b.P) + " Pa</span></div>";
+    eq += '<div class="line">P_g = ρgh = <span class="ans">' + fmt(b.Pg) + " Pa</span> (" + fmt(b.Pg / 1000) + " kPa)</div>";
+    eq += '<div class="line">F_B = ρ<sub>fluid</sub> V<sub>sub</sub> g = ' + fmt(b.rhoF) + " × " + fmt(b.Vsub) + " × " + fmt(g, 2) + ' = <span class="ans">' + fmt(b.FB) + " N</span></div>";
+    eq += '<div class="line">W = ρ<sub>obj</sub>Vg = <span class="ans">' + fmt(b.W) + " N</span> · T = " + fmt(b.T) + " N · F_N = " + fmt(b.FN) + " N</div>";
+    const floatLine = b.rhoO < b.rhoF
+      ? "วัตถุลอย จม " + b.pct.toFixed(1) + "% เพราะ V_sub/V = ρ_obj/ρ_fluid = " + fmt(b.rhoO / b.rhoF, 3)
+      : "วัตถุจมมิด V_sub = V แรงลอยตัวคงที่ตราบใดที่ยังจมทั้งก้อน ไม่เพิ่มขึ้นอีกเมื่อลึกกว่านี้";
+    analysis = paras([
+      "<b>สถานะ: " + b.status + " · ปริมาตรจม " + b.pct.toFixed(1) + "%</b>",
+      floatLine,
+      "ระดับน้ำสูงขึ้น Δh = V_sub / A_ถัง = " + fmt(b.Vsub) + " / " + fmt(b.At, 2) + " = " + fmt(b.hWater - b.h0, 4) + " m",
+      "ความดันที่ก้นถังนี้เท่ากับความดันที่ก้นภาชนะแคบในภาพด้านข้าง เพราะความลึก h = " + fmt(b.hWater, 3) + " m เท่ากัน ได้ P_g = " + fmt(b.Pg) + " Pa",
+      b.T > 0 ? "ตาชั่งอ่านแรงดึงปรากฏ T = W − F_B = " + fmt(b.T) + " N ถ้าวางบนพื้นจะได้ F_N = W − F_B แทน" : "ตาชั่งอ่านได้ใกล้ศูนย์ เพราะแรงลอยตัวรับน้ำหนักไว้ทั้งหมด"
+    ]);
+    mis = paras([
+      b.rhoO < b.rhoF
+        ? "วัตถุนี้มีมวล " + fmt(b.rhoO * b.V, 2) + " kg แต่แรงลอยตัวไม่ได้คำนวณจากมวลทั้งหมด มันลอยโดยจมเพียง " + b.pct.toFixed(1) + "% แรงลอยตัวเท่ากับน้ำหนักพอดี และขึ้นกับปริมาตรส่วนที่จมกับความหนาแน่นของของเหลว"
+        : "แม้ของจมทั้งก้อน แรงลอยตัวก็ยังเท่ากับน้ำหนักของของเหลวที่ถูกแทนที่ ρ_fluid × V × g ไม่ได้ขึ้นกับมวลวัตถุโดยตรง มวลไปโผล่ในน้ำหนัก W ต่างหาก",
+      "ภาชนะกว้างกว่าไม่ได้ทำให้ความดันที่ก้นมากขึ้น เมื่อความลึกและความหนาแน่นเท่ากัน P = ρgh เท่ากัน ทั้งภาชนะกว้างและภาชนะแคบ"
+    ]);
+    cap = "กราฟ FB เพิ่มตามระยะจมจนวัตถุมิด แล้วคงที่ เส้นส้มคือน้ำหนัก ถ้ามีจุดตัด วัตถุลอยที่ระยะนั้น";
+    assume = "g = 9.81 m/s², P₀ = 1.013×10⁵ Pa วัตถุเป็นลูกบาศก์ ถังทรงสี่เหลี่ยมพื้นที่ฐาน " + fmt(b.At, 2) + " m² ของเหลวอยู่นิ่ง";
+  } else if (mode === 3) {
+    const info = model.ball;
+    const f = info.forces;
+    const Fgmm = state.gamma * 2 * Math.PI * state.radius;
+    const fvShow = 6 * Math.PI * state.eta * state.radius * Math.abs(ball.v) * f.frac;
+    const vtWord = info.vt >= 0 ? "m/s ลง" : "m/s ขึ้น";
+    const vWord = ball.v > 0.005 ? "m/s ลง" : ball.v < -0.005 ? "m/s ขึ้น" : "m/s";
+    cards = card("แรงตึงผิว Fγ", fmt(Fgmm), "N") + card("แรงต้านความหนืด Fv", fmt(fvShow), "N") + card("ความเร็วปลาย vₜ", fmt(info.vt), vtWord) + card("ความเร็วขณะนี้ v", fmt(ball.v), vWord);
+    eq = '<div class="line">Fγ = γ(2πr) = ' + fmt(state.gamma, 4) + " × 2π × " + fmt(state.radius, 3) + ' = <span class="ans">' + fmt(Fgmm) + " N</span></div>";
+    const fvFull = 6 * Math.PI * state.eta * state.radius * Math.abs(ball.v);
+    eq += '<div class="line">Fv = 6πηrv = 6π × ' + fmt(state.eta, 3) + " × " + fmt(state.radius, 3) + " × " + fmt(Math.abs(ball.v)) + " = " + fmt(fvFull) + " N</div>";
+    eq += '<div class="line">แรงที่ใช้ในแบบจำลอง = Fv × (V<sub>sub</sub>/V) = <span class="ans">' + fmt(fvShow) + " N</span>" + (f.frac < 0.999 ? " · จม " + fmt(100 * f.frac, 1) + "%" : " · จมมิด") + "</div>";
+    eq += '<div class="line">vₜ = ' + frac("2r²g(ρ_obj − ρ_fluid)", "9η") + ' = <span class="ans">' + fmt(info.vt) + " m/s</span></div>";
+    const Re = state.rhoFluid * Math.abs(ball.v) * 2 * state.radius / state.eta;
+    const dir = info.vt >= 0 ? "ลง" : "ขึ้น";
+    const lines = [
+      "<b>ความเร็วปลายตามสูตรจมมิด = " + fmt(info.vt) + " m/s ทิศ" + dir + "</b>",
+      "เวลาผ่อนคลาย τ = 2ρr²/(9η) = " + fmt(info.tau) + " s · Re = 2rρ|v|/η = " + fmt(Re)
+    ];
+    if (state.rhoObj < state.rhoFluid) {
+      lines.push("วัตถุเบากว่าของเหลว จะสมดุลเมื่อแรงลอยตัวเท่ากับน้ำหนักโดยจมเพียงบางส่วน สูตร vₜ แบบจมมิดจึงบอกทิศขึ้น แต่ลูกกลมจะไม่พุ่งขึ้นตลอดเพราะพอโผล่พ้นผิว แรงลอยตัวลดลง");
+    } else if (ball.onFloor && ball.vImpact > 0 && ball.vImpact < 0.8 * info.vt) {
+      lines.push("ลูกกลมถึงก้นภาชนะที่ความเร็วประมาณ " + fmt(ball.vImpact) + " m/s ซึ่งยังต่ำกว่าความเร็วปลาย " + fmt(info.vt) + " m/s ลองเพิ่ม η หรือเลือกกลีเซอรีน หรือลดรัศมี");
+    } else if (!ball.onFloor && info.vt > 0) {
+      lines.push("เส้นทึบสีส้มคือความเร็วจากแบบจำลอง เส้นประคือ v = vₜ(1 − e^(−t/τ)) เมื่อสมมติว่าจมมิดตลอดและยังไม่มีพื้นภาชนะ");
+    }
+    if (Re > 1) lines.push("Re มากกว่า 1 กฎของสโตกส์ใช้ได้ดีเมื่อ Re น้อยกว่า 1 มาก ค่าบนจอยังใช้สูตรหลักสูตรเพื่อเทียบแนวโน้ม");
+    analysis = paras(lines);
+    if (Re > 1) warnings.push("เลขเรย์โนลด์สขณะนี้คือ " + fmt(Re) + " ซึ่งอยู่นอกเงื่อนไขที่กฎของสโตกส์แม่นยำ ลองกลีเซอรีนหรือลูกกลมที่เล็กลงเพื่อให้แรงหนืดครอบงำ");
+    mis = paras([
+      state.rhoObj < state.rhoFluid
+        ? "ความหนืดไม่ได้ดันให้วัตถุตกเร็วขึ้น มันต้านการเคลื่อนที่ วัตถุที่เบากว่าของเหลวจะลอย และแรงต้านจะหน่วงไม่ให้มันเด้งกลับอย่างไม่มีที่สิ้นสุด"
+        : "ของเหลวหนืดขึ้นแล้ววัตถุตกถึงความเร็วปลายที่ต่ำลง เพราะ Fv = 6πηrv สัดส่วนกับ η สูตร vₜ มี η เป็นตัวหาร ยิ่งหนืดยิ่งช้า ไม่ใช่ยิ่งหนืดยิ่งถูกดันให้เร็ว",
+      "แรงต้านความหนืดไม่คงที่ตั้งแต่ต้น มันเพิ่มตามความเร็ว จนเท่ากับน้ำหนักสุทธิ (น้ำหนักลบแรงลอยตัว) วัตถุจึงเลิกเร่ง นั่นคือความเร็วปลาย"
+    ]);
+    cap = "เส้นประสมมติว่าจมมิดตลอดเวลา เส้นสีส้มคือข้อมูลจากการเคลื่อนที่บนจอ แกนตั้งลงเป็นบวก และแกนเวลาเป็นเวลาจริง";
+    assume = "กฎของสโตกส์สำหรับทรงกลมในของไหลกว้าง ไม่คิดผลจากผนังท่อ g = 9.81 m/s² แรงตึงผิวแสดงเป็น Fγ = γ·2πr และไม่ได้ใส่ในสมการการเคลื่อนที่ ขณะลูกกลมตัดผิวมีแรงหน่วงเพิ่มเพื่อให้ภาวะลอยตัวเข้าสู่สมดุล";
+  } else {
+    const f = model.flow;
+    cards = card("อัตราเร็ว v₁", fmt(f.v1), "m/s") + card("อัตราเร็ว v₂", fmt(f.v2), "m/s") + card("อัตราการไหล Q", fmt(f.Q), "m³/s") + card("ความดัน P₁", fmt(f.P1), "Pa") + card("ความดัน P₂", fmt(f.P2), "Pa");
+    const same = Math.abs(f.sum1 - f.sum2) < 1;
+    eq = '<div class="line">Q = A₁v₁ = A₂v₂ = <span class="ans">' + fmt(f.Q) + " m³/s</span> · v₂ = " + fmt(f.v2) + " m/s</div>";
+    eq += "<table class='bern'><tr><th></th><th>จุด 1</th><th>จุด 2</th></tr>";
+    eq += "<tr><td>P</td><td>" + fmt(f.P1) + "</td><td>" + fmt(f.P2) + "</td></tr>";
+    eq += "<tr><td>½ρv²</td><td>" + fmt(f.kin1) + "</td><td>" + fmt(f.kin2) + "</td></tr>";
+    eq += "<tr><td>ρgh</td><td>" + fmt(f.pot1) + "</td><td>" + fmt(f.pot2) + "</td></tr>";
+    eq += "<tr><td>ผลรวม</td><td>" + fmt(f.sum1) + "</td><td>" + fmt(f.sum2) + (same ? " ✓" : "") + "</td></tr></table>";
+    const faster = f.v2 > f.v1 + 1e-6;
+    const lowerP = f.P2 < f.P1 - 1;
+    analysis = paras([
+      "<b>v₂/v₁ = A₁/A₂ = " + fmt(f.A1 / f.A2, 3) + "</b>",
+      "ผลต่างความดัน P₁ − P₂ = " + fmt(f.dP) + " Pa · หัวความดันต่างกัน Δh = (P₁ − P₂)/(ρg) = " + fmt((f.P1 - f.P2) / (f.rho * g), 3) + " m",
+      faster && lowerP
+        ? "ที่คอท่อพื้นที่แคบกว่า ความเร็วสูงกว่า แต่ความดันต่ำกว่า มาโนมิเตอร์ที่คอท่อจึงเตี้ยกว่า"
+        : "เปรียบเทียบสองจุดจากตาราง เทอมที่ความเร็วสูงขึ้นจะดึงเทอมความดันให้ลดลง เมื่อความสูงเท่ากัน",
+      flux1 > 5 ? "จำนวนอนุภาคสะสมที่จุด 1 และคอท่อจะไล่กัน เพราะ Q คงที่ ส่วนต่างเท่ากับอนุภาคที่ยังอยู่ระหว่างสองจุด" : "เปิดเล่นไว้สักครู่ แล้วดูตัวนับอนุภาคสองจุดว่าเพิ่มขึ้นในอัตราใกล้กัน"
+    ]);
+    if (f.kin2 > 70000) warnings.push("พลังงานจลน์ที่คอท่อสูงมาก ถ้าท่อจริงไม่ได้ถูกปั๊มเพิ่มความดัน ของเหลวอาจเกิดโพรงอากาศ แบบจำลองนี้กำหนดความดันเกจต่ำสุดที่ 8 kPa เพื่อให้คอลัมน์มาโนมิเตอร์อ่านได้ และความต่าง P₁−P₂ ยังมาจากแบร์นูลลีโดยตรง");
+    mis = paras([
+      faster && lowerP
+        ? "ของไหลไม่ได้เร็วขึ้นที่ท่อแคบเพราะความดันตรงคอท่อสูงไปดัน ตอนนี้ v₂ = " + fmt(f.v2) + " m/s สูงกว่า v₁ แต่ P₂ ต่ำกว่า P₁ อยู่ " + fmt(f.dP) + " Pa ของไหลถูกเร่งขณะพื้นที่ลดลง เพราะความดันต้นทางสูงกว่าความดันที่คอท่อ"
+        : "เมื่อพื้นที่เท่ากันหรือคอท่อกว้างกว่า ให้ดูเทอม ρgh และ ½ρv² ประกอบกัน จุดที่เร็วกว่าจะมีความดันต่ำกว่าถ้าความสูงเท่ากัน นี่คือเนื้อหาของสมการแบร์นูลลี ไม่ใช่ภาพว่าความดันสูงเป็นตัวผลักให้เร็วที่บริเวณแคบ",
+      "ความเร็วเพิ่มเพราะอัตราการไหล Q คงที่ขณะพื้นที่ลดลง จาก A₁v₁ = A₂v₂ ไม่ได้มาจากการที่ความดันในคอท่อสูงขึ้น"
+    ]);
+    cap = "กราฟบนคือความดันเกจ มีหน่วยกิโลปาสกาล กราฟล่างคืออัตราเร็ว ตรงคอท่อความเร็วขึ้นและความดันลง";
+    assume = "ของไหลอุดมคติ ไหลคงที่ อัดไม่ได้ ไม่มีความหนืด ความดันเกจต่ำสุดของสองจุดถูกตั้งไว้ที่ 8 kPa เพื่อให้มาโนมิเตอร์มองเห็น ผลรวมแบร์นูลลียังเท่ากันทั้งสองจุด";
+  }
+  paint("cards", cards);
+  paint("eq", eq);
+  paint("analysis", analysis);
+  paint("mis", mis);
+  paint("warnings", warnings.length ? '<div class="warnbox">' + paras(warnings) + "</div>" : "");
+  const capEl = $("graphCap");
+  if (capEl && capEl.textContent !== cap) capEl.textContent = cap;
+  const asEl = $("assume");
+  if (asEl && asEl.textContent !== assume) asEl.textContent = assume;
+}
+
+const fields = [];
+function paintWidgets(activeRange) {
+  silent = true;
+  fields.forEach((f) => {
+    const v = f.get();
+    if (f.r !== activeRange) f.r.value = String(v);
+    if (document.activeElement !== f.n) f.n.value = Number(v).toFixed(f.digits);
+  });
+  const yR = $("yR"), yN = $("yN");
+  if (yR !== activeRange) yR.value = String(yToPos(state.Y));
+  if (document.activeElement !== yN) yN.value = fmtGPa(state.Y);
+  silent = false;
+  updateChrome();
+}
+function bindLinear(rangeId, numId, get, set, digits, extra) {
+  const r = $(rangeId), n = $(numId);
+  fields.push({ r, n, get, digits });
+    r.addEventListener("input", () => {
+    if (silent) return;
+    set(parseFloat(r.value));
+    if (extra) extra();
+    paintWidgets(r);
+  });
+  r.addEventListener("change", () => { if (!silent) paintWidgets(null); });
+  n.addEventListener("change", () => {
+    if (silent) return;
+    set(num(n.value, get()));
+    if (extra) extra();
+    paintWidgets(null);
+  });
+}
+function updateChrome() {
+  document.querySelectorAll("#modes button").forEach((btn) => {
+    btn.setAttribute("aria-pressed", Number(btn.dataset.mode) === state.mode ? "true" : "false");
+  });
+  document.querySelectorAll("[data-modes]").forEach((el) => {
+    const modes = el.getAttribute("data-modes").split(",").map(Number);
+    el.hidden = modes.indexOf(state.mode) < 0;
+  });
+  $("btnPlay").setAttribute("aria-pressed", state.playing ? "true" : "false");
+  $("btnPause").setAttribute("aria-pressed", state.playing ? "false" : "true");
+  $("togForce").checked = state.showForces;
+  $("togFlow").checked = state.showFlow;
+  document.querySelectorAll("#fluids button").forEach((btn) => {
+    btn.setAttribute("aria-pressed", btn.dataset.fluid === state.fluidKey ? "true" : "false");
+  });
+  document.querySelectorAll("#mats button").forEach((btn) => {
+    const y = Number(btn.dataset.y);
+    const on = Math.abs(state.Y - y) / y < 0.02;
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  document.querySelectorAll("#densChips button").forEach((btn) => {
+    btn.setAttribute("aria-pressed", Number(btn.dataset.rho) === state.rhoObj ? "true" : "false");
+  });
+}
+function matchFluid() {
+  const keys = Object.keys(FLUIDS);
+  state.fluidKey = "custom";
+  for (let i = 0; i < keys.length; i++) {
+    const f = FLUIDS[keys[i]];
+    if (f.rho === state.rhoFluid && Math.abs(f.eta - state.eta) < 1e-4 && Math.abs(f.gamma - state.gamma) < 1e-4) {
+      state.fluidKey = keys[i];
+    }
+  }
+}
+function setMode(m) {
+  state.mode = m;
+  if (m === 3) resetBall();
+  if (m === 4 && particles.length === 0) seedParticles();
+  updateChrome();
+}
+function onReset() {
+  clearBreak();
+  view.buoyReady = false;
+  view.buoyDirty = false;
+  resetBall();
+  seedParticles();
+  state.playing = true;
+  updateChrome();
+}
+
+function boot() {
+  bindLinear("rhoObjR", "rhoObjN", () => state.rhoObj, (v) => { state.rhoObj = clamp(v, 200, 10000); }, 0, () => { markBuoy(); resetBall(); });
+  bindLinear("rhoFR", "rhoFN", () => state.rhoFluid, (v) => { state.rhoFluid = clamp(v, 500, 14000); matchFluid(); }, 0, () => { markBuoy(); resetBall(); markFlow(); });
+  bindLinear("volR", "volN", () => state.volume, (v) => { state.volume = clamp(v, 0.001, 0.1); }, 3, () => markBuoy());
+  bindLinear("etaR", "etaN", () => state.eta, (v) => { state.eta = clamp(v, 0.001, 1.5); matchFluid(); }, 4, () => resetBall());
+  bindLinear("radR", "radN", () => state.radius, (v) => { state.radius = clamp(v, 0.002, 0.03); }, 3, () => resetBall());
+  bindLinear("forceR", "forceN", () => state.force, (v) => { state.force = clamp(v, 0, 5000); }, 0, clearBreak);
+  bindLinear("areaR", "areaN", () => state.areaMM2, (v) => { state.areaMM2 = clamp(v, 0.5, 10); }, 1, clearBreak);
+  bindLinear("lenR", "lenN", () => state.L0, (v) => { state.L0 = clamp(v, 0.2, 2); }, 2, clearBreak);
+  bindLinear("a1R", "a1N", () => state.A1, (v) => {
+    state.A1 = clamp(v, 0.05, 1);
+    state.v1 = clamp(state.Q / state.A1, 0.5, 10);
+    state.Q = state.A1 * state.v1;
+  }, 2, markFlow);
+  bindLinear("a2R", "a2N", () => state.A2, (v) => { state.A2 = clamp(v, 0.05, 1); }, 2, markFlow);
+  bindLinear("h1R", "h1N", () => state.h1, (v) => { state.h1 = clamp(v, 0, 3); }, 1);
+  bindLinear("h2R", "h2N", () => state.h2, (v) => { state.h2 = clamp(v, 0, 3); }, 1);
+  bindLinear("v1R", "v1N", () => state.v1, (v) => { state.v1 = clamp(v, 0.5, 10); state.Q = state.A1 * state.v1; }, 1, markFlow);
+  bindLinear("qR", "qN", () => state.Q, (v) => {
+    state.Q = clamp(v, 0.05, 8);
+    state.v1 = clamp(state.Q / state.A1, 0.5, 10);
+    state.Q = state.A1 * state.v1;
+  }, 2, markFlow);
+  $("yR").addEventListener("input", () => {
+    if (silent) return;
+    state.Y = posToY(parseFloat($("yR").value));
+    clearBreak();
+    paintWidgets($("yR"));
+  });
+  $("yN").addEventListener("change", () => {
+    if (silent) return;
+    const gpa = num($("yN").value, state.Y / 1e9);
+    state.Y = clamp(gpa, 0.001, 400) * 1e9;
+    clearBreak();
+    paintWidgets(null);
+    updateChrome();
+  });
+  $("modes").addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    setMode(Number(btn.dataset.mode));
+  });
+  $("fluids").addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    const f = FLUIDS[btn.dataset.fluid];
+    state.fluidKey = btn.dataset.fluid;
+    state.rhoFluid = f.rho;
+    state.eta = f.eta;
+    state.gamma = f.gamma;
+    markBuoy(); resetBall(); markFlow();
+    paintWidgets(null); updateChrome();
+  });
+  $("densChips").addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    state.rhoObj = Number(btn.dataset.rho);
+    markBuoy(); resetBall();
+    paintWidgets(null); updateChrome();
+  });
+  $("mats").addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    state.Y = Number(btn.dataset.y);
+    const A = state.areaMM2 * 1e-6;
+    const lim = limitsFromY(state.Y);
+    state.force = clamp(Math.max(1, Math.round(lim.sigmaP * A * 0.45)), 0, 5000);
+    clearBreak();
+    paintWidgets(null); updateChrome();
+  });
+  $("togForce").addEventListener("change", (e) => { state.showForces = e.target.checked; });
+  $("togFlow").addEventListener("change", (e) => { state.showFlow = e.target.checked; });
+  $("btnPlay").addEventListener("click", () => {
+    if (state.mode === 3 && !state.playing && ballSettled()) resetBall();
+    state.playing = true;
+    updateChrome();
+  });
+  $("btnPause").addEventListener("click", () => { state.playing = false; updateChrome(); });
+  $("btnReset").addEventListener("click", onReset);
+  resetBall();
+  seedParticles();
+  paintWidgets(null);
+  updateChrome();
+  requestAnimationFrame(loop);
+}
+function loop(now) {
+  if (!last) last = now;
+  const dt = Math.min(0.033, (now - last) / 1000);
+  last = now;
+  step(dt);
+  const model = {
+    mode: state.mode,
+    e: elasticity(),
+    b: solveBuoyancy(),
+    flow: flowInfo(),
+    ball: Object.assign({ vt: terminalV(), tau: relaxTime(), forces: ballForces(ball.y, ball.v) })
+  };
+  const sim = fit($("sim"));
+  const graph = fit($("graph"));
+  drawSim(sim.ctx, sim.w, sim.h, model);
+  drawGraph(graph.ctx, graph.w, graph.h, model);
+  renderPanels(model);
+  requestAnimationFrame(loop);
+}
+
+runChecks();
+if (typeof document !== "undefined") boot();
+</script>
+</body>
+</html>
