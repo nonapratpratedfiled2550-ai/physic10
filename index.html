@@ -6,14 +6,14 @@
 <title>ของแข็งและของไหล — สื่อจำลองเชิงโต้ตอบ</title>
 <style>
   :root {
-    --ink: #1a2332;
-    --muted: #5c6b7a;
-    --navy: #14324f;
-    --teal: #0f6e8c;
-    --line: #e3d9cc;
-    --card: #fffdfb;
-    --paper: #f6f3ec;
-    --amber: #c45c12;
+    --ink: #e8eef6;
+    --muted: #9aabbc;
+    --navy: #8cf3e2;
+    --teal: #2ad4c0;
+    --line: rgba(140, 200, 210, 0.18);
+    --card: #121820;
+    --paper: #0c1016;
+    --amber: #ffb15a;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
@@ -21,9 +21,11 @@
     font-family: "Leelawadee UI", Tahoma, "Segoe UI", sans-serif;
     color: var(--ink);
     background:
-      radial-gradient(900px 320px at 0% -10%, #d5ebf4, transparent 55%),
-      linear-gradient(#f7f4ee, #e8eef2);
+      radial-gradient(880px 420px at 100% -10%, rgba(42, 212, 192, 0.16), transparent 52%),
+      radial-gradient(640px 360px at -8% 8%, rgba(255, 150, 70, 0.1), transparent 48%),
+      #07090d;
     line-height: 1.45;
+    color-scheme: dark;
   }
   button, input { font: inherit; color: inherit; }
   button { cursor: pointer; }
@@ -31,93 +33,144 @@
     outline: 2px solid var(--teal);
     outline-offset: 2px;
   }
-  .app-header, .layout { max-width: 1440px; margin: 0 auto; }
+  .app-header, .workspace { max-width: 1280px; margin: 0 auto; }
   .app-header {
     display: flex;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
     align-items: center;
-    padding: 16px 18px 8px;
+    padding: 12px 16px 6px;
     flex-wrap: wrap;
   }
-  .brand { display: flex; gap: 12px; align-items: center; }
+  .brand { display: flex; gap: 12px; align-items: center; min-width: 0; }
   .mark {
-    width: 46px; height: 46px; border-radius: 14px;
-    background: var(--navy); color: #f3d27a;
+    width: 42px; height: 42px; border-radius: 13px;
+    background: linear-gradient(160deg, #16343a, #0c1c22);
+    color: #f6d48a;
+    border: 1px solid rgba(246, 212, 138, 0.35);
     display: grid; place-items: center;
-    font-size: 28px; font-weight: 700; flex: none;
+    font-size: 26px; font-weight: 700; flex: none;
+    box-shadow: 0 0 24px rgba(42, 212, 192, 0.18);
   }
-  h1 { margin: 0; font-size: 26px; color: var(--navy); letter-spacing: -0.02em; }
-  #objective { margin: 3px 0 0; color: var(--muted); max-width: 720px; }
+  h1 { margin: 0; font-size: 22px; color: #f4f8fb; letter-spacing: -0.02em; }
+  #objective { margin: 2px 0 0; color: var(--muted); max-width: 720px; font-size: 14px; }
   .const {
-    background: var(--card);
+    background: rgba(18, 24, 32, 0.9);
     border: 1px solid var(--line);
     border-radius: 999px;
     padding: 7px 12px;
     font-size: 13px;
-    color: var(--navy);
+    color: #d5fff6;
   }
-  .layout {
-    display: grid;
-    grid-template-columns: minmax(270px, 320px) minmax(340px, 1fr) minmax(280px, 340px);
-    gap: 14px;
-    padding: 8px 14px 20px;
-    align-items: start;
+  .workspace { padding: 4px 16px 96px; }
+  h2 { margin: 12px 0 8px; font-size: 15px; color: #d9fff6; }
+  .modes {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 0 8px;
   }
-  .layout > * { min-width: 0; }
-  .col {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 12px;
-    box-shadow: 0 10px 28px rgba(20, 50, 79, 0.05);
+  .modes button {
+    border: 1px solid #2a3848;
+    background: #121820;
+    color: #d5e0ea;
+    border-radius: 999px;
+    text-align: left;
+    padding: 8px 14px;
+    white-space: nowrap;
   }
-  .left, .right { max-height: calc(100vh - 108px); overflow: auto; }
-  h2 { margin: 12px 0 8px; font-size: 15px; color: var(--navy); }
-  .left h2:first-child, .modes-head { margin-top: 0; }
-  .modes, .transport { display: grid; gap: 6px; }
-  .transport { grid-template-columns: 1fr 1fr 1fr; }
-  .modes button, .transport button, .presets button, .chips button {
-    border: 1px solid #d9d0c3;
-    background: #fff;
+  .modes button small { display: none; }
+  .modes button[aria-pressed="true"] {
+    background: linear-gradient(180deg, #5af0dc, #14b89a);
+    color: #04221c;
+    border-color: transparent;
+    font-weight: 700;
+  }
+  .runbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .transport { display: flex; gap: 6px; }
+  .transport button, .presets button, .chips button, .sheet-x {
+    border: 1px solid #2c3c4c;
+    background: #151c26;
+    color: #e7eef6;
     border-radius: 10px;
   }
-  .modes button { text-align: left; padding: 8px 10px; }
-  .modes button small { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
-  .modes button[aria-pressed="true"] {
-    background: var(--navy); color: white; border-color: var(--navy);
-  }
-  .modes button[aria-pressed="true"] small { color: #c5d5e4; }
-  .transport button, .presets button, .chips button { padding: 7px 8px; }
-  .transport button[aria-pressed="true"],
-  .presets button[aria-pressed="true"],
-  .chips button[aria-pressed="true"] {
-    background: var(--teal); color: white; border-color: var(--teal);
+  .transport button { padding: 7px 14px; }
+  .transport button[aria-pressed="true"] {
+    background: #123f3a;
+    color: #bffcf2;
+    border-color: #1f8f7e;
   }
   .presets, .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .switch { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; font-size: 14px; }
+  .presets button, .chips button { padding: 7px 10px; }
+  .presets button[aria-pressed="true"],
+  .chips button[aria-pressed="true"] {
+    background: #123f3a;
+    color: #d9fff8;
+    border-color: #2ad4c0;
+  }
+  .switch {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 0;
+    font-size: 14px;
+    color: #d5e0ea;
+  }
   .hint { color: var(--muted); font-size: 12.5px; margin: 4px 0 0; }
   .field { display: grid; grid-template-columns: 1fr 92px; gap: 4px 8px; margin: 8px 0; align-items: center; }
-  .field .name { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+  .field .name { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 8px; font-size: 14px; color: #d5e4ee; }
   input[type="range"] { width: 100%; accent-color: var(--teal); }
   input[type="number"] {
     width: 100%; padding: 4px 6px;
-    border: 1px solid #d9d0c3; border-radius: 8px; background: #fff;
+    border: 1px solid #314556; border-radius: 8px;
+    background: #0c1218; color: #f4f8fb;
   }
-  .stage { background: linear-gradient(#fbfdff, #eef4f7); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
-  canvas.sim { width: 100%; height: min(560px, 70vh); display: block; }
-  canvas.graph { width: 100%; height: 340px; display: block; background: #fffdfb; border-radius: 12px; border: 1px solid var(--line); }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 8px; margin-top: 8px; }
-  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
+  .stage {
+    background: #f4f8fb;
+    border: 1px solid rgba(140, 230, 220, 0.28);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+      0 18px 50px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(42, 212, 192, 0.08),
+      0 0 48px rgba(42, 212, 192, 0.08);
+  }
+  canvas.sim {
+    width: 100%;
+    height: clamp(380px, calc(100vh - 330px), 760px);
+    display: block;
+  }
+  canvas.graph {
+    width: 100%;
+    height: 280px;
+    display: block;
+    background: #fffdfb;
+    border-radius: 12px;
+    border: 1px solid #d9e4ea;
+  }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; }
+  .card { background: #121820; border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
   .card .lbl { color: var(--muted); font-size: 12px; }
-  .card .val { color: var(--navy); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-  .card .unit { color: var(--muted); font-size: 12px; }
+  .card .val { color: #8cf3e2; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .card .unit { color: #b7c6d4; font-size: 12px; }
   .eq {
-    margin-top: 8px; background: var(--navy); color: #f4fbff;
-    border-radius: 14px; padding: 10px 12px; overflow-x: auto; line-height: 1.65;
+    margin-top: 8px;
+    background: linear-gradient(180deg, #102028, #0c1820);
+    color: #e7f6ff;
+    border: 1px solid rgba(42, 212, 192, 0.22);
+    border-radius: 14px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    line-height: 1.65;
   }
   .eq .line { margin: 3px 0; }
-  .eq .ans { color: #fde68a; font-weight: 700; }
+  .eq .ans { color: #ffe08a; font-weight: 700; }
   .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 0.28em; line-height: 1.12; font-size: 0.92em; }
   .frac .num { border-bottom: 1.5px solid currentColor; padding: 0 0.35em 1px; }
   .frac .den { padding: 1px 0.35em 0; }
@@ -127,19 +180,79 @@
   table.bern tr:last-child td { font-weight: 700; border-top: 1px solid rgba(255,255,255,.28); }
   #assume { color: var(--muted); font-size: 12.5px; margin: 8px 2px 0; }
   #warnings:empty { display: none; }
-  .warnbox { background: #fef2f2; border: 1px solid #fecaca; color: #7f1d1d; border-radius: 12px; padding: 8px 10px; margin-top: 8px; }
+  .warnbox { background: #2a1418; border: 1px solid #8a3a44; color: #ffd5d8; border-radius: 12px; padding: 8px 10px; margin-top: 8px; }
   .warnbox p, .analysis p, .mis p { margin: 0 0 8px; }
   .warnbox p:last-child, .analysis p:last-child, .mis p:last-child { margin-bottom: 0; }
   .analysis, .mis { border-radius: 12px; padding: 10px 12px; font-size: 14px; }
-  .analysis { background: #f1fbf8; border: 1px solid #b7e4d8; }
-  .mis { background: #fff6ed; border: 1px solid #f3c7a2; }
+  .analysis { background: #10241f; border: 1px solid #1d6b5a; color: #dff8f2; }
+  .mis { background: #2a1d12; border: 1px solid #8a5a2b; color: #ffe7d0; }
   .block { margin-top: 12px; }
   #graphCap { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+  .dock {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 50;
+  }
+  .dock button {
+    border: 1px solid rgba(90, 240, 220, 0.45);
+    background: #10161e;
+    color: #e9fff9;
+    border-radius: 999px;
+    padding: 12px 18px;
+    font-weight: 700;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  }
+  .dock button[aria-expanded="true"] {
+    background: linear-gradient(180deg, #5af0dc, #14b89a);
+    color: #04221c;
+    border-color: transparent;
+  }
+  .sheet {
+    position: fixed;
+    right: 16px;
+    bottom: 84px;
+    width: min(420px, calc(100vw - 24px));
+    max-height: min(74vh, 680px);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    background: #10161d;
+    color: var(--ink);
+    border: 1px solid rgba(90, 240, 220, 0.28);
+    border-radius: 18px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+    pointer-events: none;
+    transform-origin: 100% 100%;
+    transition: transform .32s cubic-bezier(.16, 1.25, .32, 1), opacity .2s ease, visibility .32s;
+  }
+  #sheetGraph { width: min(460px, calc(100vw - 24px)); }
+  .sheet.open {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+  .sheet-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px 0;
+  }
+  .sheet-head h2 { margin: 0; }
+  .sheet-x { padding: 4px 10px; }
+  .sheet-body { overflow: auto; padding: 4px 12px 14px; }
   [hidden] { display: none !important; }
-  @media (max-width: 1100px) {
-    .layout { grid-template-columns: 1fr; }
-    .left, .right { max-height: none; }
-    canvas.sim { height: 460px; }
+  @media (max-width: 720px) {
+    h1 { font-size: 18px; }
+    canvas.sim { height: clamp(340px, calc(100vh - 300px), 640px); }
+    .sheet, #sheetGraph { left: 12px; right: 12px; width: auto; }
   }
 </style>
 </head>
@@ -154,27 +267,40 @@
   </div>
   <div class="const">g = 9.81 m/s² · P₀ = 1.013×10<sup>5</sup> Pa</div>
 </header>
-<div class="layout">
-  <aside class="col left">
-    <h2 class="modes-head">โหมดการจำลอง</h2>
-    <div class="modes" id="modes">
-      <button type="button" data-mode="1" aria-pressed="true">1. สภาพยืดหยุ่น<small>ความเค้น ความเครียด มอดุลัสของยัง</small></button>
-      <button type="button" data-mode="2">2. ความดันและแรงลอยตัว<small>P = P₀ + ρgh และอาร์คิมีดิส</small></button>
-      <button type="button" data-mode="3">3. แรงตึงผิวและความหนืด<small>สโตกส์และความเร็วปลาย</small></button>
-      <button type="button" data-mode="4">4. พลศาสตร์ของไหล<small>ความต่อเนื่องและแบร์นูลลี</small></button>
-    </div>
-
-    <h2>การทดลอง</h2>
+<div class="workspace">
+  <div class="modes" id="modes">
+    <button type="button" data-mode="1" aria-pressed="true" title="ความเค้น ความเครียด มอดุลัสของยัง">1. สภาพยืดหยุ่น</button>
+    <button type="button" data-mode="2" title="P = P₀ + ρgh และอาร์คิมีดิส">2. ความดันและแรงลอยตัว</button>
+    <button type="button" data-mode="3" title="สโตกส์และความเร็วปลาย">3. แรงตึงผิวและความหนืด</button>
+    <button type="button" data-mode="4" title="ความต่อเนื่องและแบร์นูลลี">4. พลศาสตร์ของไหล</button>
+  </div>
+  <div class="runbar">
     <div class="transport">
       <button type="button" id="btnPlay">เล่น</button>
       <button type="button" id="btnPause">หยุด</button>
       <button type="button" id="btnReset" title="เริ่มการเคลื่อนที่ใหม่ โดยไม่ล้างค่าที่ตั้ง">เริ่มใหม่</button>
     </div>
+    <label class="switch"><input type="checkbox" id="togForce" checked> เวกเตอร์แรง</label>
+    <label class="switch"><input type="checkbox" id="togFlow" checked> สายธารและความดัน</label>
+  </div>
+  <div class="stage"><canvas id="sim" class="sim" width="800" height="540" aria-label="ภาพจำลอง"></canvas></div>
+  <div id="warnings"></div>
+  <div id="cards" class="cards"></div>
+  <div id="eq" class="eq"></div>
+  <p id="assume"></p>
+</div>
 
-    <h2>การแสดงผล</h2>
-    <label class="switch"><input type="checkbox" id="togForce" checked> แสดงเวกเตอร์แรง (F<sub>g</sub>, F<sub>B</sub>, F<sub>v</sub>, F<sub>N</sub>, T)</label>
-    <label class="switch"><input type="checkbox" id="togFlow" checked> แสดงเส้นสายธารการไหลและแผนที่ความดัน</label>
-    <p class="hint">แผนที่ความดันใช้กับท่อเวนจูรี สีอุ่นหมายถึงความดันสูง สีเย็นหมายถึงความดันต่ำ</p>
+<div class="dock">
+  <button type="button" id="fabTune" aria-expanded="false" aria-controls="sheetTune">ปรับค่า</button>
+  <button type="button" id="fabGraph" aria-expanded="false" aria-controls="sheetGraph">กราฟ</button>
+</div>
+
+<aside class="sheet" id="sheetTune" aria-hidden="true">
+  <div class="sheet-head">
+    <h2>ปรับค่า</h2>
+    <button type="button" class="sheet-x" data-close>ปิด</button>
+  </div>
+  <div class="sheet-body">
 
     <div class="group" data-modes="2,3,4" hidden>
       <h2>ชนิดของเหลว</h2>
@@ -300,20 +426,17 @@
         <input id="qR" type="range" min="0.05" max="8" step="0.01" value="1">
         <input id="qN" type="number" min="0.05" max="8" step="0.01" value="1">
       </label>
-      <p class="hint">Q กับ v₁ ผูกกันด้วย Q = A₁v₁ ของไหลอุดมคติ อัดไม่ได้ และไม่มีความหนืด</p>
+      <p class="hint">Q กับ v₁ ผูกกันด้วย Q = A₁v₁ ของไหลอุดมคติ อัดไม่ได้ และไม่มีความหนืด สีอุ่นบนแผนที่คือความดันสูง สีเย็นคือความดันต่ำ</p>
     </div>
-  </aside>
+  </div>
+</aside>
 
-  <main class="col">
-    <div class="stage"><canvas id="sim" class="sim" width="800" height="540" aria-label="ภาพจำลอง"></canvas></div>
-    <div id="warnings"></div>
-    <div id="cards" class="cards"></div>
-    <div id="eq" class="eq"></div>
-    <p id="assume"></p>
-  </main>
-
-  <aside class="col right">
-    <h2>กราฟความสัมพันธ์</h2>
+<aside class="sheet" id="sheetGraph" aria-hidden="true">
+  <div class="sheet-head">
+    <h2>กราฟและคำอธิบาย</h2>
+    <button type="button" class="sheet-x" data-close>ปิด</button>
+  </div>
+  <div class="sheet-body">
     <p id="graphCap"></p>
     <canvas id="graph" class="graph" width="640" height="340" aria-label="กราฟ"></canvas>
     <div class="block">
@@ -324,8 +447,8 @@
       <h2>ความเข้าใจคลาดเคลื่อนที่พบบ่อย</h2>
       <div id="mis" class="mis"></div>
     </div>
-  </aside>
-</div>
+  </div>
+</aside>
 <script>
 const g = 9.81;
 const P0 = 1.013e5;
@@ -1690,6 +1813,28 @@ function boot() {
   });
   $("btnPause").addEventListener("click", () => { state.playing = false; updateChrome(); });
   $("btnReset").addEventListener("click", onReset);
+  function setSheet(which) {
+    const tuneOn = which === "tune";
+    const graphOn = which === "graph";
+    $("sheetTune").classList.toggle("open", tuneOn);
+    $("sheetGraph").classList.toggle("open", graphOn);
+    $("sheetTune").setAttribute("aria-hidden", tuneOn ? "false" : "true");
+    $("sheetGraph").setAttribute("aria-hidden", graphOn ? "false" : "true");
+    $("fabTune").setAttribute("aria-expanded", tuneOn ? "true" : "false");
+    $("fabGraph").setAttribute("aria-expanded", graphOn ? "true" : "false");
+  }
+  $("fabTune").addEventListener("click", (e) => {
+    e.stopPropagation();
+    setSheet($("sheetTune").classList.contains("open") ? null : "tune");
+  });
+  $("fabGraph").addEventListener("click", (e) => {
+    e.stopPropagation();
+    setSheet($("sheetGraph").classList.contains("open") ? null : "graph");
+  });
+  document.querySelectorAll("[data-close]").forEach((btn) => {
+    btn.addEventListener("click", () => setSheet(null));
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") setSheet(null); });
   resetBall();
   seedParticles();
   paintWidgets(null);
